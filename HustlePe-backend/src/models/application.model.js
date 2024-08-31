@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const appSchema = new mongoose.Schema({
     gig_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Gig',
+        ref: 'gigs',
         required: true,
     },
-    user_id: {
+    hustler_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Hustler',
         required: true,
     },
     status: {
@@ -19,6 +19,6 @@ const appSchema = new mongoose.Schema({
     cover_letter: {
         type: String,
     },
-}, {} ) ;
+}, {timestamps: true} ) ;
 
 export const Application = mongoose.model('Application' , appSchema) ;

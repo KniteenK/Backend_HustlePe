@@ -119,7 +119,7 @@ const signInHustler = asyncHandler (async (req, res) => {
 });
 
 const logoutHustler = asyncHandler(async(req, res) => {
-    await User.findByIdAndUpdate(
+    await Hustler.findByIdAndUpdate(
         req.user._id,
         {
             $set: {

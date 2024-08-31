@@ -7,6 +7,10 @@ const hustlerSchema = new mongoose.Schema({
         unique: true,
         trim: true,
     },
+    gender: {
+        type: String,
+        enum: ['Male', 'Female', 'Other'],
+    },
     email: {
         type: String,
         required: true,
@@ -18,10 +22,6 @@ const hustlerSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    role: {
-        type: String,
-        enum: ['hustler', 'client'],
-    },
     coverImage: {
         type: String,
         default: '',
@@ -30,16 +30,19 @@ const hustlerSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    city: {
-        type: String,
-        required: true,
-    } ,
-    country: {
-        type: String,
-        required: true,
-    },
+    address: {
+        city: {
+          type: String,
+          required: true,
+        } ,
+        country: {
+          type: String,
+          required: true,
+        }
+      },
     avatar: {
         type: String,
+        required: true,
         default: '',
     },
     refreshToken: {
@@ -158,6 +161,23 @@ const hustlerSchema = new mongoose.Schema({
         enum: ['Available', 'Busy', 'On Break'],
         default: 'Available',
     },
+    preferred_rate: {
+        type: Number,
+        default: 0,
+    },
+    languages: [{
+        type: String,
+    }],
+    total_earnings: {
+        type: Number,
+        default: 0,
+    },
+    testimonials: [{
+        description: string , 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'client',
+        rating: Number
+    }]
 
 }, {timestamps: true}) ;
 
