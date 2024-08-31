@@ -1,6 +1,6 @@
 import express from 'express';
 import { upload } from '../middlewares/multer.middleware.js';
-import { signUpHustler , signInHustler , logoutHustler} from '../controllers/authHustler.controller.js';
+import { signUpHustler , signInHustler , logoutHustler, refreshAccessToken} from '../controllers/authHustler.controller.js';
 import signUpClient from '../controllers/authClient.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -35,6 +35,7 @@ router.route('/signupHustler').post(upload.fields([
 
 router.route('/signinHustler').post(signInHustler) ;
 router.route('/logoutHustler').post(verifyJWT , logoutHustler) ;
+router.route('/refreshToken').post(refreshAccessToken) ;
 
 
 export default router;
