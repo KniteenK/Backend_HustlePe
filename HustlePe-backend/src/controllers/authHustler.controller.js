@@ -29,9 +29,12 @@ const signUpHustler = asyncHandler(async (req, res) => {
         throw new apiError(400, "Avatar is required");
     }
 
-    const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
-    if (!uploadedAvatar) {
-        throw new apiError(500, "Failed to upload avatar");
+    let uploadedAvatar ;
+    if (uploadedAvatar) {
+        uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
+        if (!uploadedCoverImage) {
+            throw new apiError(500, "Failed to upload cover image");
+        }
     }
 
     let uploadedCoverImage;
