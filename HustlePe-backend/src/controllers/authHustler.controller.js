@@ -6,7 +6,7 @@ import apiResponse from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken"
 
 const signUpHustler = asyncHandler(async (req, res) => {
-    const { username, email, password, first_name, last_name, contactNumber, city, country } = req.body;
+    const { username, email, password, first_name, last_name, contactNumber, address: { city, country } } = req.body;
 
     if (
         [username, email, password, first_name, last_name, contactNumber, city, country].
