@@ -18,10 +18,6 @@ const clientSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      role: {
-        type: String,
-        enum: ['hustler', 'client'],
-      },
       coverImage: {
         type: String,
         default: '',
