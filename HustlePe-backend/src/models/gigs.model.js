@@ -9,6 +9,10 @@ const gigSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    deadline: {
+        type: Date,
+        required: true,
+    },
     budget: {
         type: Number,
         required: true,
@@ -25,6 +29,11 @@ const gigSchema = new mongoose.Schema({
     skills_req: [{
         type: String,
     }] ,
+    payment_option: {
+        type: String,
+        enum: ['escrow', 'milestone'],
+        default: 'escrow',
+    }
 } , {timestamps: true});
 
 export const gigs = mongoose.model('gigs', gigSchema);

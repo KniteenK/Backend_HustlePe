@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -118,4 +117,4 @@ dist
 .pnp.*
 
 
-# End of https://mrkandreev.name/snippets/gitignore-generator/#Node,nodejs
+
