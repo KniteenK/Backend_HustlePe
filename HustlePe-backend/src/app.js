@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { configDotenv } from 'dotenv';
-import hustlerRouter from './routes/auth.routes.js'
+import router from './routes/auth.routes.js'
 
-configDotenv();
+configDotenv(".env") ;
 
 const app = express();
 
