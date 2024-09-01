@@ -19,6 +19,6 @@ app.use(cookieParser()) ;
 
 
 import hustlerRouter from './routes/auth.routes.js' ;
-app.use('/api/v1/registerHustler', hustlerRouter) ;
+app.use('/api/v1/hustler', hustlerRouter) ;
 
 export default app ;
