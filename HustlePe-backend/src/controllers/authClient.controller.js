@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import { client } from "../models/client.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
+import { apiError } from "../utils/apiError.js";
 
 const signUpClient = asyncHandler ( async (req , res) => {
     const {username , email , password , contactNumber , city , country , organisation} = req.body ;
@@ -63,4 +64,89 @@ const signUpClient = asyncHandler ( async (req , res) => {
 
 }) ;
 
-export default signUpClient ;
+
+ const signInClient = asyncHandler(async (req, res) => {
+    const {email,username,password}=req.body;
+
+    if(!email || !username){
+        throw new apiError(400,"Email or username is required");
+    }
+
+    if(!password){
+        throw new apiError(400,"Password is required");
+    }
+    const isClient = await client.findOne({
+        $or:[{email},{username}]
+    });
+
+    if(!isClient){
+        throw new apiError(404,"Client not found");
+    }
+
+    const isMatch = await isClient.matchPassword(password);
+
+    if(!isMatch){
+        throw new apiError(401,"Invalid password");
+    }
+
+    try {
+        const Client = await client.findById(isClient._id).select("-password -refreshToken");
+        const accessToken= await client.generateAccessToken();
+        const refreshToken= await client.generateRefreshToken();
+
+        Client.accessToken=accessToken;
+        Client.save({ validateBeforeSave: false });        
+    } catch (error) {
+        throw new apiError(500, "Failed to generate access token");
+    }
+
+    const client= await client.findById(isClient._id).select(
+        "-password -refreshToken"
+    );
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    };
+
+    return res.status(200)
+    .cookies("refreshToken" , refreshToken , options)
+    .cookie("accessToken" , accessToken , options)
+    .json(
+        new apiResponse(200 , {
+            client: client , accessToken , refreshToken
+        }, "Client logged in successfully")
+    )
+ });
+
+
+const signOutClient = asyncHandler(async (req, res) => {
+    await client.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset: {
+                accessToken: 1
+            }
+        },
+        { 
+            new: true  
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new apiResponse(200, {}, "Client logged Out Successfully"))
+});
+
+
+export default {
+    signUpClient,
+    signInClient,
+    signOutClient
+} ;
