@@ -66,7 +66,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
 
 
  const signInClient = asyncHandler(async (req, res) => {
-    const {email,username,password}=req.body;
+    const {email,username,password} = req.body;
 
     if(!email || !username){
         throw new apiError(400,"Email or username is required");
@@ -76,7 +76,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
         throw new apiError(400,"Password is required");
     }
     const isClient = await client.findOne({
-        $or:[{email},{username}]
+        $or: [{email},{username}]
     });
 
     if(!isClient){
@@ -145,7 +145,7 @@ const signOutClient = asyncHandler(async (req, res) => {
 });
 
 
-export default {
+export {
     signUpClient,
     signInClient,
     signOutClient

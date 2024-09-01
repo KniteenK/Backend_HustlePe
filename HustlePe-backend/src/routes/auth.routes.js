@@ -1,12 +1,12 @@
 import express from 'express';
 import { upload } from '../middlewares/multer.middleware.js';
 import { signUpHustler , signInHustler , logoutHustler, refreshAccessToken} from '../controllers/authHustler.controller.js';
-import signUpClient from '../controllers/authClient.controller.js';
+import { signUpClient } from '../controllers/authClient.controller.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.route('/signupClient').post(upload.fields([
+router.route('/signUpClient').post(upload.fields([
     {
         name: 'avatar',
         maxCount: 1
