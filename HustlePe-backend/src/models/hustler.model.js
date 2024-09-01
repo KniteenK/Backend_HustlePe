@@ -173,7 +173,7 @@ const hustlerSchema = new mongoose.Schema({
         default: 0,
     },
     testimonials: [{
-        description: string , 
+        type: String , 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'client',
         rating: Number
