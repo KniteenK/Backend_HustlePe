@@ -18,20 +18,7 @@ router.route('/signUpClient').post(upload.fields([
 ]) ,  signUpClient) ;
 
 
-router.route('/signupHustler').post(upload.fields([
-    {
-        name: 'avatar',
-        maxCount: 1
-    },
-    {
-        name: 'coverImage',
-        maxCount: 1
-    },
-    {
-        name: 'resume',
-        maxCount: 1
-    }
-]) ,  signUpHustler) ;
+router.route('/signupHustler').post(signUpHustler) ;
 
 router.route('/signinHustler').post(signInHustler) ;
 router.route('/logoutHustler').post(verifyJWT , logoutHustler) ;

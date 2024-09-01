@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt" ;
 
 const hustlerSchema = new mongoose.Schema({
     username: {
@@ -185,7 +186,7 @@ const hustlerSchema = new mongoose.Schema({
 hustlerSchema.pre("save" , async function (next) {
     if (!this.isModified("password")) return next() ;
     
-    this.password = await bcrypt().hash(this.password , 10) ;
+    this.password = await bcrypt.hash(this.password , 10) ;
     next() ;
   })
   

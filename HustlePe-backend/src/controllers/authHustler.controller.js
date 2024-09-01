@@ -1,16 +1,16 @@
-import asyncHandler from "../utils/asyncHandler.js";
-import { apiError } from "../utils/apiError.js";
+import jwt from "jsonwebtoken";
 import { Hustler } from "../models/hustler.model.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js";
+import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
-import jwt from "jsonwebtoken"
-
+import asyncHandler from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const signUpHustler = asyncHandler(async (req, res) => {
-    const { username, email, password, first_name, last_name, contactNumber, address: { city, country } } = req.body;
+    const { username, email, password, first_name, last_name, contactNumber, address } = req.body;
+    const { city, country } = address;
 
     if (
-        [username, email, password, first_name, last_name, contactNumber, city, country].
-        some((field) => field.trim() === "")) {
+        [username, email, password, first_name, last_name, contactNumber, city, country].some((field) => field.trim() === "")
+    ) {
         throw new apiError(400, "All fields are required");
     }
 
@@ -25,15 +25,11 @@ const signUpHustler = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
     const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-    if (!avatarLocalPath) {
-        throw new apiError(400, "Avatar is required");
-    }
-
-    let uploadedAvatar ;
-    if (uploadedAvatar) {
-        uploadedCoverImage = await uploadOnCloudinary(coverImageLocalPath);
-        if (!uploadedCoverImage) {
-            throw new apiError(500, "Failed to upload cover image");
+    let uploadedAvatar;
+    if (avatarLocalPath) {
+        uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
+        if (!uploadedAvatar) {
+            throw new apiError(500, "Failed to upload avatar");
         }
     }
 
@@ -49,14 +45,15 @@ const signUpHustler = asyncHandler(async (req, res) => {
         username: username.toLowerCase(),
         first_name,
         last_name,
-        avatar: uploadedAvatar.url ,
+        avatar: uploadedAvatar?.url || 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
         email,
         password,
-        avatar: uploadedAvatar?.url ,
         coverImage: uploadedCoverImage?.url || "",
         contactNumber,
-        city,
-        country,
+        address: {
+            city,
+            country
+        },
         role: "hustler",
     });
 
@@ -282,12 +279,9 @@ const updateCoverImage = asyncHandler (async (req , res) => {
 })
 
 export {
-    signUpHustler,
-    signInHustler,
-    logoutHustler,
-    refreshAccessToken,
     changePassword,
-    getUser,
-    updateAvatar,  
-    updateCoverImage,
-} 
+    getUser, logoutHustler,
+    refreshAccessToken, signInHustler, signUpHustler, updateAvatar,
+    updateCoverImage
+};
+

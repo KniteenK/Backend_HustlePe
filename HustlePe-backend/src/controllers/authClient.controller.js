@@ -49,7 +49,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
         city,
         country,
         organisation,
-        avatar: uploadedAvatar.url,
+        avatar: uploadedAvatar?.url || 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
         coverImage: uploadedCoverImage?.url || "",
         role: "client"
     }) ;
