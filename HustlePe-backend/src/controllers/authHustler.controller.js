@@ -108,10 +108,10 @@ const signInHustler = asyncHandler (async (req, res) => {
         secure: true
     };
 
-    return res.status(200).
-    cookies("refreshToken" , refreshToken , options).
-    cookie("accessToken" , accessToken , options).
-    json(
+    return res.status(200)
+    .cookies("refreshToken" , refreshToken , options)
+    .cookie("accessToken" , accessToken , options)
+    .json(
         new apiResponse(200 , {
             user: user , accessToken , refreshToken
         }, "User logged in successfully")
@@ -170,8 +170,7 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
  
      const token = await generateAccessToken(hustler._id) 
  
-     return res.
-     status(200)
+     return res.status(200)
      .cookies("refreshToken" , token)
      .json(
          new apiResponse(200, {

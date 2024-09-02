@@ -20,9 +20,15 @@ router.route('/signUpClient').post(upload.fields([
 
 router.route('/signupHustler').post(signUpHustler) ;
 
+// Hustlers Routes
 router.route('/signinHustler').post(signInHustler) ;
 router.route('/logoutHustler').post(verifyJWT , logoutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
+
+// Clients Routes
+// router.route('/signinClient').post(signInClient) ;
+// router.route('/logoutClient').post(verifyJWT , LogOutClient) ;
+
 
 
 export default router;
