@@ -5,6 +5,10 @@ const gigSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    client_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'client',
+    },
     description: {
         type: String,
         required: true,
@@ -22,10 +26,6 @@ const gigSchema = new mongoose.Schema({
         enum: ['open' , 'closed'],
         default: 'open',
     },
-    applications: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Application',
-    }] ,
     skills_req: [{
         type: String,
     }] ,
@@ -33,6 +33,10 @@ const gigSchema = new mongoose.Schema({
         type: String,
         enum: ['escrow', 'milestone'],
         default: 'escrow',
+    },
+    assigned_hustler: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Hustler',
     }
 } , {timestamps: true});
 

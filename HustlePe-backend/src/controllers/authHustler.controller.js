@@ -4,6 +4,7 @@ import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 const signUpHustler = asyncHandler(async (req, res) => {
     const { username, email, password, first_name, last_name, contactNumber, address } = req.body;
     const { city, country } = address;

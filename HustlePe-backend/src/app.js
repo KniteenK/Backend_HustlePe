@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { configDotenv } from 'dotenv';
-import router from './routes/auth.routes.js'
 
 configDotenv(".env") ;
 
@@ -18,7 +17,10 @@ app.use(express.static("public")) ;
 app.use(cookieParser()) ;
 
 
-import hustlerRouter from './routes/auth.routes.js' ;
+import hustlerRouter from './routes/hustlerAuth.routes.js' ;
 app.use('/api/v1/hustler', hustlerRouter) ;
 
+import clientRouter from './routes/clientAuth.routes.js' ;
+app.use('/api/v1/client', clientRouter) ;
+ 
 export default app ;

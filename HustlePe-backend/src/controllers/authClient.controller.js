@@ -144,9 +144,35 @@ const signOutClient = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "Client logged Out Successfully"))
 });
 
+const postGig = asyncHandler ( async (req , res) => {
+    const {title , description , deadline , budget , skills_req , payment_option , _id} = req.body;
+    console.log(title, description, deadline, budget, skills_req , payment_option , _id);
+    if (
+        [title, description, deadline, budget, skills_req, payment_option]
+        .some((field) => field.trim() === "")
+    ){
+        throw new Error("All fields are required") ;
+    }
+
+    const gig = await gigs.create({
+        title,
+        description,
+        _id,
+        deadline,
+        budget,
+        skills_req,
+        payment_option,
+    }) ;
+
+    res.status(201).json(
+        new apiResponse(201, gig, "Gig created successfully")
+    ) ;
+}) ;
+
 
 export {
     signUpClient,
     signInClient,
-    signOutClient
+    signOutClient,
+    postGig,
 } ;
