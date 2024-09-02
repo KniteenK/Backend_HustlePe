@@ -49,7 +49,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
         city,
         country,
         organisation,
-        avatar: uploadedAvatar.url,
+        avatar: uploadedAvatar?.url || 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
         coverImage: uploadedCoverImage?.url || "",
         role: "client"
     }) ;
@@ -66,7 +66,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
 
 
  const signInClient = asyncHandler(async (req, res) => {
-    const {email,username,password}=req.body;
+    const {email,username,password} = req.body;
 
     if(!email || !username){
         throw new apiError(400,"Email or username is required");
@@ -76,7 +76,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
         throw new apiError(400,"Password is required");
     }
     const isClient = await client.findOne({
-        $or:[{email},{username}]
+        $or: [{email},{username}]
     });
 
     if(!isClient){
@@ -430,6 +430,7 @@ const changeOrganisation = asyncHandler(async (req, res) => {
 
 
 export  {
+
     signUpClient,
     signInClient,
     LogOutClient,

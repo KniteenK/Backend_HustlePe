@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt" ;
 
 const hustlerSchema = new mongoose.Schema({
     username: {
@@ -42,8 +43,8 @@ const hustlerSchema = new mongoose.Schema({
       },
     avatar: {
         type: String,
-        required: true,
-        default: '',
+        // required: true,
+        default: 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
     },
     refreshToken: {
         type: String,
@@ -185,7 +186,7 @@ const hustlerSchema = new mongoose.Schema({
 hustlerSchema.pre("save" , async function (next) {
     if (!this.isModified("password")) return next() ;
     
-    this.password = await bcrypt().hash(this.password , 10) ;
+    this.password = await bcrypt.hash(this.password , 10) ;
     next() ;
   })
   

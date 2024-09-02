@@ -6,7 +6,7 @@ import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.route('/signupClient').post(upload.fields([
+router.route('/signUpClient').post(upload.fields([
     {
         name: 'avatar',
         maxCount: 1
@@ -18,20 +18,7 @@ router.route('/signupClient').post(upload.fields([
 ]) ,  signUpClient) ;
 
 
-router.route('/signupHustler').post(upload.fields([
-    {
-        name: 'avatar',
-        maxCount: 1
-    },
-    {
-        name: 'coverImage',
-        maxCount: 1
-    },
-    {
-        name: 'resume',
-        maxCount: 1
-    }
-]) ,  signUpHustler) ;
+router.route('/signupHustler').post(signUpHustler) ;
 
 // Hustlers Routes
 router.route('/signinHustler').post(signInHustler) ;
