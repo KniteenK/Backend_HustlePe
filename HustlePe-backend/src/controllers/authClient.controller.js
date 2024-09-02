@@ -119,8 +119,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
     )
  });
 
-
-const signOutClient = asyncHandler(async (req, res) => {
+const LogOutClient = asyncHandler(async (req, res) => {
     await client.findByIdAndUpdate(
         req.user._id,
         {
@@ -144,9 +143,303 @@ const signOutClient = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, {}, "Client logged Out Successfully"))
 });
 
+const changeEmail=  asyncHandler(async (req, res) => {
+    const {password, email} = req.body;
+    if (!password || password.trim() === "") {
+        throw new apiError(400, "Password is required");
+    }
 
-export default {
+    if (!email || email.trim() === "") {
+        throw new apiError(400, "Email is required");
+    }   
+
+    const user= client.findById(req.user._id);
+    if(!user){
+        throw new apiError(404, "Client not found");
+    }
+
+    if(user.password!==password){
+        throw new apiError(401, "Password is not correct");
+    }
+
+    const existingUser = await client.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+        throw new apiError(409, "Email already taken. Please choose a different one.");
+    }
+
+    try{
+        user.email=email;
+        const changedEmail= await user.save({ validateBeforeSave: false });
+
+        if(!changedEmail){
+            throw new apiError(500, "Failed to change email");
+        }
+
+        return res.status(200).json(
+            new apiResponse(
+                200, user, "Email changed successfully"
+            )
+        );
+    }
+    catch(error){
+        throw new apiError(500, "Failed to change email");
+    }
+
+});
+
+
+
+const changeUsername = asyncHandler(async (req, res) => {
+    try{
+    const { username } = req.body;
+    if (!username || username.trim() === "") {
+        throw new apiError(400, "Username is required");
+    }
+    const isClient = await client.findById(req.user._id);
+    if (!isClient) {
+        throw new apiError(404, "Client not found");
+    }
+
+    const existingUser = await client.findOne({ username });
+        if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+            throw new apiError(409, "Username already taken. Please choose a different one.");
+    }
+
+
+    isClient.username = username;
+    await isClient.save({validateBeforeSave: false});
+
+    if( isClient.username==username ){
+    return res.status(200)
+    .json(
+        new apiResponse(200, isClient, "Username changed successfully")
+        );
+    }
+    }
+    catch(error){
+        throw new apiError(500, "Failed to change username");
+    }
+});
+
+const changePassword=asyncHandler ( async(req,res) =>{
+    const { oldPassword,newPassword } = req.body;
+
+    if (!oldPassword || oldPassword.trim() === "") {
+        throw new apiError(400, "Old password is required");
+    }
+
+    const isClient = await client.findById(req.user._id);
+    if (!isClient) {
+        throw new apiError(404, "Client not found");
+    }
+
+    if(isClient.password!==oldPassword){
+        throw new apiError(401,"Old password is not correct");
+    }
+    
+    if (!password || password.trim() === "") {
+        throw new apiError(400, "Password is required");
+    }
+
+    try{
+        isClient.password = newPassword;
+        const isChanged=await isClient.save({validateBeforeSave: false});
+
+        if(!isChanged){
+            throw new apiError(500, "Failed to change password");
+        }
+        if( isClient.password==password ){
+            return res.status(200)
+            .json(
+                new apiResponse(200, isClient, "Password changed successfully")
+                );
+            }
+        }
+        catch(error){
+            throw new apiError(500, "Failed to change password");
+        }
+});
+
+const changeAddress = asyncHandler(async (req, res) => {
+    const { city, country } = req.body;
+    if (!city || city.trim() === "") {
+        throw new apiError(400, "City is required");
+    }
+
+    if (!country || country.trim() === "") {
+        throw new apiError(400, "Country is required");
+    }
+
+    const isClient = await client.findById(req.user._id);
+    if (!isClient) {
+        throw new apiError(404, "Client not found");
+    }
+
+    try{
+        isClient.address = `${city}, ${country}`;
+
+        const changedaddr= await isClient.save({ validateBeforeSave: false });
+
+        if(!changedaddr){
+            throw new apiError(500, "Failed to change address");
+        }
+
+        return res.status(200).json(
+            new apiResponse(
+                200, isClient, "Address changed successfully"
+            )
+        );
+    }
+    catch(error){
+        throw new apiError(500, "Failed to change address");
+    }
+});
+
+
+const updateAvatar = asyncHandler (async (req , res) => {
+    const avatarLocalPath = req.file?.path 
+
+    if (!avatarLocalPath) {
+        throw new apiError(400, "Avatar is required");
+    }
+    
+    const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!uploadedAvatar) {
+        throw new apiError(500, "Failed to upload avatar");
+    }
+
+    const user = await client.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                avatar: uploadedAvatar.url
+            }
+        },
+        {
+            new: true
+        }
+    ).select ("-password")
+
+    return res.status(200)
+    .json(
+        new apiResponse(200, user, "Avatar updated successfully")
+    )
+
+})
+
+const updateCoverImage = asyncHandler (async (req , res) => {
+    const coverLocalPath = req.file?.path 
+
+    if (!coverLocalPath) {
+        throw new apiError(400, "Cover image is required");
+    }
+    
+    const uploadedCover = await uploadOnCloudinary(coverLocalPath);
+
+    if (!uploadedCover) {
+        throw new apiError(500, "Failed to upload cover image");
+    }
+
+    const user = await client.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                coverImage: uploadedCover.url
+            }
+        },
+        {
+            new: true
+        }
+    ).select ("-password")
+
+    return res.status(200)
+    .json(
+        new apiResponse(200, user, "Cover image updated successfully")
+    )
+
+});
+
+const changeContactNumber = asyncHandler(async (req, res) => {
+    const { contactNumber } = req.body;
+    if(!contactNumber || contactNumber.trim() === ""){
+        throw new apiError(400, "Contact number is required");
+    }
+
+    const user=await client.findById(req.user._id);
+    if(!user){
+        throw new apiError(404, "Client not found");
+    }
+
+    try{
+        user.contactNumber=contactNumber;
+        const changedContact= await user.save({ validateBeforeSave: false });
+
+        if(!changedContact){
+            throw new apiError(500, "Failed to change contact number");
+        }
+
+        return res.status(200).json(
+            new apiResponse(
+                200, user, "Contact number changed successfully"
+            )
+        );
+    }
+    catch(error){
+        throw new apiError(500, "Failed to change contact number");
+    }
+});
+
+const changeOrganisation = asyncHandler(async (req, res) => {
+    const { organisation } = req.body;
+    if(!organisation || organisation.trim() === ""){
+        throw new apiError(400, "Organisation is required");
+    }
+
+    const user=await client.findById(req.user._id); 
+    if(!user){
+        throw new apiError(404, "Client not found");
+    }
+
+    try{
+        user.organisation=organisation;
+        const changedOrganisation= await user.save(
+            { 
+                validateBeforeSave: false 
+            }
+        );
+
+        if(!changedOrganisation){
+            throw new apiError(500, "Failed to change organisation");
+        }
+
+        return res.status(200).json(
+            new apiResponse(
+                200, user, "Organisation changed successfully"
+            )
+        );
+    }
+    catch(error){
+        throw new apiError(500, "Failed to change organisation");
+    }
+});
+
+
+
+
+
+
+export  {
     signUpClient,
     signInClient,
-    signOutClient
+    LogOutClient,
+    changePassword,
+    changeEmail,
+    changeUsername,
+    changeAddress,
+    updateAvatar,
+    updateCoverImage,
+    changeContactNumber,
+    changeOrganisation
+
 } ;
