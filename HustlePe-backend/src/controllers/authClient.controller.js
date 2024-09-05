@@ -65,7 +65,6 @@ const signUpClient = asyncHandler ( async (req , res) => {
 
 }) ;
 
-
  const signInClient = asyncHandler(async (req, res) => {
     const {email,username,password} = req.body;
 

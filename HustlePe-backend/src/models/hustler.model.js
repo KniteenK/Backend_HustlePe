@@ -178,7 +178,11 @@ const hustlerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'client',
         rating: Number
-    }]
+    }],
+    role: {
+        type: String ,
+        default: "HUSTLER" ,
+    }
 
 }, {timestamps: true}) ;
 
@@ -194,30 +198,30 @@ hustlerSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password) ;
 }
   
-  hustlerSchema.methods.generateAccessToken = async function () {
-    return jwt.sign(
-      {
-        _id: this._id , 
-        username: this.username , 
-        email: this.email
-      }
-      , process.env.ACCESS_TOKEN_SECRET , 
-      { 
-        expiresIn:  process.env.ACCESS_TOKEN_EXPIRY ,
-      }  
-    )
-  }
-  hustlerSchema.methods.generateRefreshToken = async function () {
-    return jwt.sign(
-      {
-        _id: this._id ,
-      }
-      , process.env.REFRESH_TOKEN_SECRET , 
-      { 
-        expiresIn:  process.env.REFRESH_TOKEN_EXPIRY ,
-      }  
-    )
-  }
+hustlerSchema.methods.generateAccessToken = async function () {
+return jwt.sign(
+    {
+    _id: this._id , 
+    username: this.username , 
+    email: this.email
+    }
+    , process.env.ACCESS_TOKEN_SECRET , 
+    { 
+    expiresIn:  process.env.ACCESS_TOKEN_EXPIRY ,
+    }  
+)
+}
+hustlerSchema.methods.generateRefreshToken = async function () {
+return jwt.sign(
+    {
+    _id: this._id ,
+    }
+    , process.env.REFRESH_TOKEN_SECRET , 
+    { 
+    expiresIn:  process.env.REFRESH_TOKEN_EXPIRY ,
+    }  
+)
+}
 
 
 export const Hustler = mongoose.model('Hustler' , hustlerSchema) ;
