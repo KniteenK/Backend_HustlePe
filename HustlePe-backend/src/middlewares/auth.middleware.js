@@ -6,11 +6,11 @@ import { client } from "../models/client.model.js";
 
 
 
-export const verifyJWT = asyncHandler( async (req, _ , next) => {
+const verifyHustlerJWT = asyncHandler( async (req, _ , next) => {
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") ;
         if (!token) {
-            throw new apiError("Unauthorized request");
+            throw new apiError(401 , "Unauthorized request");
         }
     
         const isAuthorized = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET) ;
@@ -32,29 +32,32 @@ export const verifyJWT = asyncHandler( async (req, _ , next) => {
 
 });
 
-// const verifyClient = asyncHandler( async (req, _ , next) => {
-//     try {
-//         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") ;
-//         if (!token) {
-//             throw new apiError("Unauthorized request");
-//         }
+const verifyClientJWT = asyncHandler( async (req, _ , next) => {
+    try {
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") ;
+        if (!token) {
+            throw new apiError(401 , "Unauthorized request");
+        }
     
-//         const isAuthorized = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET) ;
+        const isAuthorized = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET) ;
     
-//         const user = await client.findById (isAuthorized._id).select(
-//             "-password -refreshToken"
-//         )
+        const user = await client.findById (isAuthorized._id).select(
+            "-password -refreshToken"
+        )
 
-//         if (!user) {
-//             throw new apiError(401 ,"Unauthorized request");
-//         }
+        if (!user) {
+            throw new apiError(401 ,"Unauthorized request");
+        }
 
-//         req.user = client ;
-//         next();
+        req.user = client ;
+        next();
         
-//     } catch (error) {
-//         throw new apiError(401 , error?.message || "Unauthorized request")
-//     }
-// });
+    } catch (error) {
+        throw new apiError(401 , error?.message || "Unauthorized request")
+    }
+});
 
-// export {verifyJWT} 
+export {
+    verifyHustlerJWT,
+    verifyClientJWT
+} 

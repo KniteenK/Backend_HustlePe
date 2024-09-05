@@ -3,6 +3,7 @@ import { client } from "../models/client.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
+import gigs from "../models/gigs.model.js";
 
 const signUpClient = asyncHandler ( async (req , res) => {
     const {username , email , password , contactNumber , city , country , organisation} = req.body ;
@@ -119,7 +120,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
     )
  });
 
-const LogOutClient = asyncHandler(async (req, res) => {
+const signOutClient = asyncHandler(async (req, res) => {
     await client.findByIdAndUpdate(
         req.user._id,
         {
@@ -187,8 +188,6 @@ const changeEmail=  asyncHandler(async (req, res) => {
 
 });
 
-
-
 const changeUsername = asyncHandler(async (req, res) => {
     try{
     const { username } = req.body;
@@ -221,7 +220,7 @@ const changeUsername = asyncHandler(async (req, res) => {
     }
 });
 
-const changePassword=asyncHandler ( async(req,res) =>{
+const changePassword = asyncHandler ( async(req,res) =>{
     const { oldPassword,newPassword } = req.body;
 
     if (!oldPassword || oldPassword.trim() === "") {
@@ -294,7 +293,6 @@ const changeAddress = asyncHandler(async (req, res) => {
         throw new apiError(500, "Failed to change address");
     }
 });
-
 
 const updateAvatar = asyncHandler (async (req , res) => {
     const avatarLocalPath = req.file?.path 
@@ -425,7 +423,60 @@ const changeOrganisation = asyncHandler(async (req, res) => {
 });
 
 
+const postGig = asyncHandler ( async (req , res) => {
+    const {title , description , deadline , budget , skills_req , payment_option , _id} = req.body;
+    console.log(title, description, deadline, budget, skills_req , payment_option , _id);
+    if (
+        [title, description, deadline, budget, skills_req, payment_option]
+        .some((field) => field.trim() === "")
+    ){
+        throw new Error("All fields are required") ;
+    }
 
+    const gig = await gigs.create({
+        title,
+        description,
+        _id,
+        deadline,
+        budget,
+        skills_req,
+        payment_option,
+    }) ;
+
+    res.status(201).json(
+        new apiResponse(201, gig, "Gig created successfully")
+    ) ;
+}) ;
+
+const selectHustler = asyncHandler ( async (req , res) => {
+    try {
+        const { gigId, hustlerId } = req.body;
+        if (!gigId || !hustlerId) {
+            throw new apiError(400, "Gig ID and Hustler ID are required");
+        }
+        
+        gigs.findByIdAndUpdate(
+            gigId ,
+            {
+                $set: {
+                    assigned_hustler: hustlerId
+                }
+            },
+            {
+                new: true
+            }
+        )
+
+        return res.status(200).
+        json(
+            new apiResponse(200, {}, "Hustler assigned to gig successfully")
+        );
+
+    } catch (error) {
+        throw new apiError(500, "Failed to assign hustler to gig");
+    }
+
+})
 
 
 
@@ -433,7 +484,8 @@ export  {
 
     signUpClient,
     signInClient,
-    LogOutClient,
+    signOutClient,
+    postGig,
     changePassword,
     changeEmail,
     changeUsername,
@@ -441,6 +493,6 @@ export  {
     updateAvatar,
     updateCoverImage,
     changeContactNumber,
-    changeOrganisation
-
+    changeOrganisation,
+    selectHustler
 } ;

@@ -4,6 +4,7 @@ import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import Applicaltion from "../models/application.model.js"
 
 const signUpHustler = asyncHandler(async (req, res) => {
     const { username, email, password, first_name, last_name, contactNumber, address } = req.body;
@@ -65,7 +66,7 @@ const signUpHustler = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(new apiResponse(200, isCreated, "User created successfully"));
-});
+})
 
 const signInHustler = asyncHandler (async (req, res) => {
 
@@ -117,7 +118,7 @@ const signInHustler = asyncHandler (async (req, res) => {
         }, "User logged in successfully")
     )
 
-});
+})
 
 const logoutHustler = asyncHandler(async(req, res) => {
     await Hustler.findByIdAndUpdate(
@@ -278,10 +279,34 @@ const updateCoverImage = asyncHandler (async (req , res) => {
 
 })
 
+const applyToJob = asyncHandler (async (req , res) => {
+    const {gig_id ,hustler_id , cover_letter} = req.body ;
+
+    const app = await Applicaltion.create({
+        gig_id ,
+        hustler_id ,
+        cover_letter
+    })
+
+    if (!app) {
+        throw new apiError(500, "Failed to apply to job")
+    }
+
+    return res.status(200)
+    .json(
+        new apiResponse(200, app, "Applied to job successfully")
+    )
+})
+
 export {
     changePassword,
-    getUser, logoutHustler,
-    refreshAccessToken, signInHustler, signUpHustler, updateAvatar,
-    updateCoverImage
+    getUser, 
+    logoutHustler,
+    refreshAccessToken, 
+    signInHustler, 
+    signUpHustler, 
+    updateAvatar,
+    updateCoverImage,
+    applyToJob
 };
 
