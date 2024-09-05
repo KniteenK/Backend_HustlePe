@@ -3,7 +3,7 @@ import { client } from "../models/client.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import apiResponse from "../utils/apiResponse.js";
 import { apiError } from "../utils/apiError.js";
-import gigs from "../models/gigs.model.js";
+import {gigs} from "../models/gigs.model.js";
 
 const signUpClient = asyncHandler ( async (req , res) => {
     const {username , email , password , contactNumber , city , country , organisation} = req.body ;

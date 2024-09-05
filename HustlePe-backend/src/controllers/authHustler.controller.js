@@ -4,7 +4,7 @@ import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import Applicaltion from "../models/application.model.js"
+import {Application} from "../models/application.model.js"
 
 const signUpHustler = asyncHandler(async (req, res) => {
     const { username, email, password, first_name, last_name, contactNumber, address } = req.body;
@@ -292,7 +292,7 @@ const updateCoverImage = asyncHandler (async (req , res) => {
 const applyToJob = asyncHandler (async (req , res) => {
     const {gig_id ,hustler_id , cover_letter} = req.body ;
 
-    const app = await Applicaltion.create({
+    const app = await Application.create({
         gig_id ,
         hustler_id ,
         cover_letter
