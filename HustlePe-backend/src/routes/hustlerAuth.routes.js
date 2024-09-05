@@ -19,7 +19,7 @@ router.route('/signUpHustler').post(upload.fields([
 
 
 // Hustlers Routes
-router.route('/signinHustler').post(signIn) ;
+router.route('/signInHustler').post(signIn) ;
 router.route('/logoutHustler').post(verifyHustlerJWT , logoutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
 

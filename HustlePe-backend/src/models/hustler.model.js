@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt" ;
+import jwt from "jsonwebtoken" 
 
 const hustlerSchema = new mongoose.Schema({
     username: {
@@ -216,7 +217,7 @@ return jwt.sign(
     {
     _id: this._id ,
     }
-    , process.env.REFRESH_TOKEN_SECRET , 
+    , process.env.ACCESS_REFRESH_TOKEN , 
     { 
     expiresIn:  process.env.REFRESH_TOKEN_EXPIRY ,
     }  

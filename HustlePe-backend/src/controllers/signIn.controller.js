@@ -5,21 +5,22 @@ import asyncHandler from "../utils/asyncHandler.js";
 import apiResponse from "../utils/apiResponse.js"; 
 
 const signIn = asyncHandler(async (req, res) => {
-    const { email, username, password } = req.body;
+
+    const { email , password } = req.body ;
     
-    if (!email && !username) {
-        throw new apiError(400, "Email or username is required");
-    }
+    // if (!username) {
+    //     throw new apiError(400, "Email or username is required");
+    // }
 
     let user = await Hustler.findOne({
-        $or: [{ email }, { username }]
+        $or: [{ email }]
     });
 
     // If not found in Hustlers, search in Clients
     let role = 'hustler'; // Default role as hustler
     if (!user) {
         user = await client.findOne({
-            $or: [{ email }, { username }]
+            $or: [{ email }]
         });
 
         if (!user) {
@@ -30,7 +31,7 @@ const signIn = asyncHandler(async (req, res) => {
     }
 
     // Check password
-    const checkPassword = await user.checkPassword(password);
+    const checkPassword = await user.isPasswordCorrect(password);
 
     if (!checkPassword) {
         throw new apiError(401, "Invalid password");
@@ -42,7 +43,7 @@ const signIn = asyncHandler(async (req, res) => {
         const refreshToken = await user.generateRefreshToken();
 
         // Save accessToken for hustler or client (without validation before save)
-        user.accessToken = accessToken;
+        user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
 
         // Select user fields to return, omitting sensitive data
@@ -58,8 +59,8 @@ const signIn = asyncHandler(async (req, res) => {
 
         // Return response with both access and refresh tokens, along with user details
         return res.status(200)
-            .cookies("refreshToken", refreshToken, options)
-            .cookies("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .cookie("accessToken", accessToken, options)
             .json(
                 new apiResponse(200, {
                     user: userData, 
@@ -70,7 +71,7 @@ const signIn = asyncHandler(async (req, res) => {
             );
 
     } catch (error) {
-        throw new apiError(500, "Failed to generate access token");
+        throw new apiError(500, error.message || "Failed to generate access token");
     }
 });
 
