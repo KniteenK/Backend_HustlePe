@@ -65,7 +65,17 @@ const signUpHustler = asyncHandler(async (req, res) => {
         throw new apiError(500, "Failed to create user");
     }
 
-    return res.status(201).json(new apiResponse(200, isCreated, "User created successfully"));
+    const options = {
+        httpOnly: true,
+        secure: true
+    };
+
+    return res.status(201).
+    json(
+        new apiResponse(200, isCreated, "User created successfully")
+    )
+    .cookies("refreshToken" , refreshToken , options)
+    .cookies("accessToken" , accessToken , options)
 })
 
 const signInHustler = asyncHandler (async (req, res) => {
@@ -111,7 +121,7 @@ const signInHustler = asyncHandler (async (req, res) => {
 
     return res.status(200)
     .cookies("refreshToken" , refreshToken , options)
-    .cookie("accessToken" , accessToken , options)
+    .cookies("accessToken" , accessToken , options)
     .json(
         new apiResponse(200 , {
             user: user , accessToken , refreshToken
