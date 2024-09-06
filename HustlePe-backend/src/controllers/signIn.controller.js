@@ -1,77 +1,78 @@
 import { Hustler } from "../models/hustler.model.js";
 import { client } from "../models/client.model.js";  // Ensure client model is properly named (capitalized)
-import {apiError} from "../utils/apiError.js";
+import { apiError } from "../utils/apiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import apiResponse from "../utils/apiResponse.js"; 
 
 const signIn = asyncHandler(async (req, res) => {
+    // console.log('Request Body:', req.body);
+    const { email, username, password } = req.body;
+    // console.log(email, username, password)
 
-    const { email , password } = req.body ;
-    
-    // if (!username) {
-    //     throw new apiError(400, "Email or username is required");
-    // }
+    // Ensure at least one of email or username is provided
+    if (!email && !username) {
+        throw new apiError(400, "Email or username is required");
+    }
 
-    let user = await Hustler.findOne({
-        $or: [{ email }]
-    });
+    // Create query condition based on whether email or username is provided
+    const query = email ? { email } : { username };
+
+    // Search in Hustlers using email or username
+    let user = await Hustler.findOne(query);
+
+    let role = 'hustler'; // Default role is 'hustler'
 
     // If not found in Hustlers, search in Clients
-    let role = 'hustler'; // Default role as hustler
     if (!user) {
-        user = await client.findOne({
-            $or: [{ email }]
-        });
+        user = await client.findOne(query);
 
         if (!user) {
             throw new apiError(404, "User not found");
         }
 
-        role = 'client';  // If user found in clients, change role
+        role = 'client';  // If user found in clients, change role to 'client'
     }
 
-    // Check password
-    const checkPassword = await user.isPasswordCorrect(password);
+    // Check password validity
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
 
-    if (!checkPassword) {
+    if (!isPasswordCorrect) {
         throw new apiError(401, "Invalid password");
     }
 
     try {
-        // Generate tokens based on role
+        // Generate access and refresh tokens
         const accessToken = await user.generateAccessToken();
         const refreshToken = await user.generateRefreshToken();
 
-        // Save accessToken for hustler or client (without validation before save)
+        // Save refreshToken in the user document
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
 
-        // Select user fields to return, omitting sensitive data
+        // Select the necessary user fields, omitting sensitive data
         const userData = await user.constructor.findById(user._id).select(
             "-password -refreshToken"
         );
 
-        // Setting cookie options (for security and HTTP-only access)
+        // Cookie options for security
         const options = {
             httpOnly: true,
-            secure: true
+            secure: true // Set to true in production
         };
 
-        // Return response with both access and refresh tokens, along with user details
+        // Return response with user details and tokens
         return res.status(200)
             .cookie("refreshToken", refreshToken, options)
             .cookie("accessToken", accessToken, options)
             .json(
                 new apiResponse(200, {
-                    user: userData, 
-                    accessToken, 
-                    refreshToken,
+                    user: userData,
                     role
                 }, "User logged in successfully")
             );
 
     } catch (error) {
-        throw new apiError(500, error.message || "Failed to generate access token");
+        throw new apiError(500, error.message || "Some error occurred while logging in");
     }
 });
 
