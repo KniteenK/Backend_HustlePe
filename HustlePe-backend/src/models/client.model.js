@@ -38,7 +38,7 @@ const clientSchema = new mongoose.Schema({
       },
       avatar: {
         type: String,
-        required: true,
+        default: 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
       },
       refreshToken: {
         type: String,
@@ -47,18 +47,15 @@ const clientSchema = new mongoose.Schema({
         name: {
             type: String,
             required: true,
-            trim: true,
         } , 
     }, 
     current_gigs: [{
         type: mongoose.Schema.Types.ObjectId , 
         ref: 'Gig',
-        required: true,
     }] ,
     past_gigs: [{
         type: mongoose.Schema.Types.ObjectId , 
         ref: 'Gig',
-        required: true,
     }] ,
 
     ratings: {
