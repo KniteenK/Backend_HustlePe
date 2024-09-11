@@ -44,10 +44,8 @@ const clientSchema = new mongoose.Schema({
         type: String,
       },
     organisation: {
-        name: {
-            type: String,
-            required: true,
-        } , 
+        type: String,
+        required: true,
     }, 
     current_gigs: [{
         type: mongoose.Schema.Types.ObjectId , 

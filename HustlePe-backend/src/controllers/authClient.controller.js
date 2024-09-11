@@ -7,10 +7,11 @@ import {gigs} from "../models/gigs.model.js";
 
 const signUpClient = asyncHandler ( async (req , res) => {
     try {
-        const {username , email , password , contactNumber , city , country , organisation} = req.body ;
+        const {username , email , password , contactNumber , address , organisation} = req.body ;
+        const { city, country } = address;
     
         if (
-            [username, email, password, contactNumber , city, country, organisation].some((field) => field.trim === "")
+            [username, email, password, contactNumber , city, country, organisation].some((field) => field.trim() === "")
         ){
             throw new Error("All fields are required") ;
         }
@@ -48,8 +49,10 @@ const signUpClient = asyncHandler ( async (req , res) => {
             email,
             password,
             contactNumber,
-            city,
-            country,
+            address: {
+                city,
+                country,
+              },
             organisation,
             avatar: uploadedAvatar?.url || 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
             coverImage: uploadedCoverImage?.url || "",
