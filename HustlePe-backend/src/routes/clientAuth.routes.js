@@ -7,7 +7,6 @@ router.route('/postGig').post(postGig);
 
 router.route('/signUpClient').post(signUpClient);
 
-
 router.route('/signInClient').post(signIn);
 
 router.route('/signOutClient').post(signOutClient);

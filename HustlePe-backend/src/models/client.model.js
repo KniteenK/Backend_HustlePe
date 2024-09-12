@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import bcrypt from "bcrypt" ;
+import jwt from "jsonwebtoken" 
 
 const clientSchema = new mongoose.Schema({
     username: {
@@ -72,9 +74,9 @@ const clientSchema = new mongoose.Schema({
 }); 
 
 clientSchema.pre("save" , async function (next) {
-    if (!this.isModified("passwprd")) return next() ;
+    if (!this.isModified("password")) return next() ;
     
-    this.password = await bcrypt().hash(this.password , 10) ;
+    this.password = await bcrypt.hash(this.password , 10) ;
     next() ;
 })
   
@@ -100,7 +102,7 @@ clientSchema.methods.generateRefreshToken = async function () {
     {
       _id: this._id ,
     }
-    , process.env.REFRESH_TOKEN_SECRET , 
+    , process.env.ACCESS_REFRESH_TOKEN , 
     { 
       expiresIn:  process.env.REFRESH_TOKEN_EXPIRY ,
     }  
