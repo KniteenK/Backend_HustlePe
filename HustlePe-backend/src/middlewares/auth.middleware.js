@@ -34,7 +34,8 @@ const verifyHustlerJWT = asyncHandler( async (req, _ , next) => {
 
 const verifyClientJWT = asyncHandler( async (req, _ , next) => {
     try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") ;
+        const token = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "") ;
+        console.log (token) ;
         if (!token) {
             throw new apiError(401 , "Unauthorized request");
         }
@@ -46,7 +47,7 @@ const verifyClientJWT = asyncHandler( async (req, _ , next) => {
         )
 
         if (!user) {
-            throw new apiError(401 ,"Unauthorized request");
+            throw new apiError(401 ,"Unauthorized access");
         }
 
         req.user = client ;

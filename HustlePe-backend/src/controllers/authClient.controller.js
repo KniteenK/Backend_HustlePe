@@ -43,7 +43,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
                 throw new apiError(500, "Failed to upload cover image");
             }
         }
-    
+        
         const isClient = await client.create({
             username,
             email,
@@ -62,11 +62,26 @@ const signUpClient = asyncHandler ( async (req , res) => {
         if (!isClient) {
             throw new Error("Failed to create user") ;
         }
+        
+        const accessToken = isClient.generateAccessToken()
+        const refreshToken = isClient.generateRefreshToken()
+        isClient.accessToken = accessToken
+        isClient.save({ validateBeforeSave: false })
+
+
         // console.log(isClient)
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
     
         return res.status(201).json(
-            new apiResponse(200 , isClient , "user created successfully") 
-        )
+            new apiResponse(200 , {isClient , accessToken , refreshToken} , "user created successfully") 
+        ).
+        cookie("accessToken" , accessToken , options).
+        cookie("refreshToken" , refreshToken , options)
+
     } catch (error) {
         console.log('error: ', error.message) ;
     }
@@ -74,59 +89,6 @@ const signUpClient = asyncHandler ( async (req , res) => {
 
 }) ;
 
- const signInClient = asyncHandler(async (req, res) => {
-    const {email,username,password} = req.body;
-
-    if(!email || !username){
-        throw new apiError(400,"Email or username is required");
-    }
-
-    if(!password){
-        throw new apiError(400,"Password is required");
-    }
-    const isClient = await client.findOne({
-        $or: [{email},{username}]
-    });
-
-    if(!isClient){
-        throw new apiError(404,"Client not found");
-    }
-
-    const isMatch = await isClient.matchPassword(password);
-
-    if(!isMatch){
-        throw new apiError(401,"Invalid password");
-    }
-
-    try {
-        const Client = await client.findById(isClient._id).select("-password -refreshToken");
-        const accessToken= await client.generateAccessToken();
-        const refreshToken= await client.generateRefreshToken();
-
-        Client.accessToken=accessToken;
-        Client.save({ validateBeforeSave: false });        
-    } catch (error) {
-        throw new apiError(500, "Failed to generate access token");
-    }
-
-    const client= await client.findById(isClient._id).select(
-        "-password -refreshToken"
-    );
-
-    const options = {
-        httpOnly: true,
-        secure: true
-    };
-
-    return res.status(200)
-    .cookies("refreshToken" , refreshToken , options)
-    .cookie("accessToken" , accessToken , options)
-    .json(
-        new apiResponse(200 , {
-            client: client , accessToken , refreshToken
-        }, "Client logged in successfully")
-    )
- });
 
 const signOutClient = asyncHandler(async (req, res) => {
     await client.findByIdAndUpdate(
@@ -162,7 +124,7 @@ const changeEmail=  asyncHandler(async (req, res) => {
         throw new apiError(400, "Email is required");
     }   
 
-    const user= client.findById(req.user._id);
+    const user = client.findById(req.user._id);
     if(!user){
         throw new apiError(404, "Client not found");
     }
@@ -432,28 +394,34 @@ const changeOrganisation = asyncHandler(async (req, res) => {
 
 
 const postGig = asyncHandler ( async (req , res) => {
-    const {title , description , deadline , budget , skills_req , payment_option , _id} = req.body;
-    console.log(title, description, deadline, budget, skills_req , payment_option , _id);
-    if (
-        [title, description, deadline, budget, skills_req, payment_option]
-        .some((field) => field.trim() === "")
-    ){
-        throw new Error("All fields are required") ;
+    const {title , description , deadline , budget , skills_req , payment_option} = req.body;
+    const client_id = req.user._id
+    // console.log (req.body)
+    // console.log(title, description, deadline, budget, skills_req , payment_option , _id);
+    try {
+        if (
+            [title, description, deadline, budget, skills_req, payment_option]
+            .some((field) => field.trim === "")
+        ){
+            throw new Error("All fields are required") ;
+        }
+    
+        const gig = await gigs.create({
+            title,
+            description,
+            client_id,
+            deadline,
+            budget,
+            skills_req,
+            payment_option,
+        }) ;
+        res.status(201).json(
+            new apiResponse(201, gig, "Gig created successfully")
+        ) ;
+    } catch (error) {
+        console.error ("error : " , error.message || 'Something went horribly wrong')
     }
 
-    const gig = await gigs.create({
-        title,
-        description,
-        _id,
-        deadline,
-        budget,
-        skills_req,
-        payment_option,
-    }) ;
-
-    res.status(201).json(
-        new apiResponse(201, gig, "Gig created successfully")
-    ) ;
 }) ;
 
 const selectHustler = asyncHandler ( async (req , res) => {
@@ -491,7 +459,6 @@ const selectHustler = asyncHandler ( async (req , res) => {
 export  {
 
     signUpClient,
-    signInClient,
     signOutClient,
     postGig,
     changePassword,

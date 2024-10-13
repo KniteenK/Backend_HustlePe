@@ -1,6 +1,6 @@
 import express from 'express';
 import { upload } from '../middlewares/multer.middleware.js';
-import { signUpHustler , signInHustler , logoutHustler, refreshAccessToken} from '../controllers/authHustler.controller.js';
+import { signUpHustler , logoutHustler, refreshAccessToken} from '../controllers/authHustler.controller.js';
 import { verifyHustlerJWT } from '../middlewares/auth.middleware.js';
 import signIn from '../controllers/signIn.controller.js';
 

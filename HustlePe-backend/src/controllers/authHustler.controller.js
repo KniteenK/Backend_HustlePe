@@ -78,58 +78,6 @@ const signUpHustler = asyncHandler(async (req, res) => {
     .cookies("accessToken" , accessToken , options)
 })
 
-const signInHustler = asyncHandler (async (req, res) => {
-
-    const { email , username , password } = req.body ;
-    if (!email && !username) {
-        throw new apiError(400, "Email or username is required");
-    }
-
-    const isExist = await Hustler.findOne({
-        $or: [{email} , {username}] 
-    })
-
-    if (!isExist) {
-        throw new apiError(404, "User not found");
-    }
-
-    const checkPassword = await isExist.checkPassword(password) ;
-
-    if (!checkPassword) {
-        throw new apiError(401, "Invalid password");
-    }
-
-    try {
-        const hustler = await Hustler.findById(isExist._id)
-        const accessToken = await hustler.generateAccessToken() ;
-        const refreshToken = await hustler.generateRefreshToken() ;
-
-        hustler.accessToken = accessToken ;
-        hustler.save({ validateBeforeSave: false }) ;
-    } catch (error) {
-        throw new apiError(500, "Failed to generate access token");
-    }
-
-    const user = await Hustler.findById(isExist._id).select(
-        "-password -refreshToken"
-    ); 
-
-    const options = {
-        httpOnly: true,
-        secure: true
-    };
-
-    return res.status(200)
-    .cookies("refreshToken" , refreshToken , options)
-    .cookies("accessToken" , accessToken , options)
-    .json(
-        new apiResponse(200 , {
-            user: user , accessToken , refreshToken
-        }, "User logged in successfully")
-    )
-
-})
-
 const logoutHustler = asyncHandler(async(req, res) => {
     await Hustler.findByIdAndUpdate(
         req.user._id,
@@ -313,7 +261,6 @@ export {
     getUser, 
     logoutHustler,
     refreshAccessToken, 
-    signInHustler, 
     signUpHustler, 
     updateAvatar,
     updateCoverImage,

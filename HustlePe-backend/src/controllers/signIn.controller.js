@@ -6,7 +6,7 @@ import apiResponse from "../utils/apiResponse.js";
 
 const signIn = asyncHandler(async (req, res) => {
     // console.log('Request Body:', req.body);
-    const { email, username, password } = req.body;
+    const { email, username, password } = req.body ;
     // console.log(email, username, password)
 
     // Ensure at least one of email or username is provided
@@ -50,23 +50,31 @@ const signIn = asyncHandler(async (req, res) => {
         await user.save({ validateBeforeSave: false });
 
         // Select the necessary user fields, omitting sensitive data
-        const userData = await user.constructor.findById(user._id).select(
-            "-password -refreshToken"
-        );
+        let userData ;
+        if (role === 'client') {
+            userData = await client.findById(user._id).select(
+                "-password -refreshToken"
+            );
+        }
+        else {
+            userData = await Hustler.findById(user._id).select(
+                "-password -refreshToken"
+            );
+        }
 
         // Cookie options for security
         const options = {
             httpOnly: true,
-            secure: true // Set to true in production
+            secure: true
         };
 
         // Return response with user details and tokens
         return res.status(200)
-            .cookie("refreshToken", refreshToken, options)
-            .cookie("accessToken", accessToken, options)
             .json(
                 new apiResponse(200, {
-                    user: userData,
+                    userData,
+                    accessToken,
+                    refreshToken,
                     role
                 }, "User logged in successfully")
             );
