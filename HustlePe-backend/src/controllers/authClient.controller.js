@@ -417,7 +417,7 @@ const postGig = asyncHandler ( async (req , res) => {
         }) ;
         res.status(201).json(
             new apiResponse(201, gig, "Gig created successfully")
-        ) ;
+        );
     } catch (error) {
         console.error ("error : " , error.message || 'Something went horribly wrong')
     }
