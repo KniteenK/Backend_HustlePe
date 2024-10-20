@@ -1,16 +1,16 @@
 import express from 'express';
-import { upload } from '../middlewares/multer.middleware.js';
-import { signUpHustler , logoutHustler, refreshAccessToken,changePassword,
-    getUser, 
-    logoutHustler,
-    refreshAccessToken, 
-    signUpHustler, 
+import {
+    applyToJob,
+    changePassword,
+    getUser,
+    refreshAccessToken,
+    signUpHustler,
     updateAvatar,
-    updateCoverImage,
-    applyToJob}
-    from '../controllers/authHustler.controller.js';
-import { verifyHustlerJWT } from '../middlewares/auth.middleware.js';
+    updateCoverImage
+} from '../controllers/authHustler.controller.js';
 import signIn from '../controllers/signIn.controller.js';
+import { verifyHustlerJWT } from '../middlewares/auth.middleware.js';
+import { upload } from '../middlewares/multer.middleware.js';
 
 const router = express.Router();
 
@@ -31,7 +31,7 @@ router.route('/signUpHustler').post(upload.fields([
 
 // Hustlers Routes
 router.route('/signInHustler').post(signIn) ;
-router.route('/logoutHustler').post(verifyHustlerJWT , logoutHustler) ;
+// router.route('/logoutHustler').post(verifyHustlerJWT , logoutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
 
 router.route('/updateAvatar').patch(updateAvatar);

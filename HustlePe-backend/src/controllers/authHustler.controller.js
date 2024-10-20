@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
+import { Application } from "../models/application.model.js";
 import { Hustler } from "../models/hustler.model.js";
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import {Application} from "../models/application.model.js"
 
 const signUpHustler = asyncHandler(async (req, res) => {
     const { username, email, password, first_name, last_name, contactNumber, address } = req.body;
@@ -175,7 +175,7 @@ const getUser = asyncHandler (async (req , res) => {
 
 const updateAvatar = asyncHandler (async (req , res) => {
     const avatarLocalPath = req.file?.path 
-
+    console.log('avatarLocalPath', avatarLocalPath)
     if (!avatarLocalPath) {
         throw new apiError(400, "Avatar is required");
     }
@@ -257,13 +257,12 @@ const applyToJob = asyncHandler (async (req , res) => {
 })
 
 export {
-    changePassword,
-    getUser, 
+    applyToJob, changePassword,
+    getUser,
     logoutHustler,
-    refreshAccessToken, 
-    signUpHustler, 
+    refreshAccessToken,
+    signUpHustler,
     updateAvatar,
-    updateCoverImage,
-    applyToJob
+    updateCoverImage
 };
 
