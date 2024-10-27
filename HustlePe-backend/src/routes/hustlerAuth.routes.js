@@ -11,6 +11,7 @@ import {
 import signIn from '../controllers/signIn.controller.js';
 import { verifyHustlerJWT } from '../middlewares/auth.middleware.js';
 import { upload } from '../middlewares/multer.middleware.js';
+import getGigs from '../controllers/gig.controller.js';
 
 const router = express.Router();
 
@@ -40,5 +41,7 @@ router.route('/changePassword').patch(changePassword);
 router.route('/applyToJob').post(applyToJob);
 router.route('/getUser').get(verifyHustlerJWT , getUser) ;
 
+// get all the jobs or search with filters
+router.route('/getGigs').post(getGigs) ;
 
 export default router;
