@@ -1,4 +1,4 @@
-import { gigs } from "../models/gigs.model";
+import { gigs } from "../models/gigs.model.js";
 
 const getGigs = async () => {
     const { skillsArray, sortBy = 'createdAt', order = -1, page = 1, limit = 10} = req.body;
