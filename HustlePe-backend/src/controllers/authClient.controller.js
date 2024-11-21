@@ -1,9 +1,9 @@
-import asyncHandler from "../utils/asyncHandler.js"
 import { client } from "../models/client.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import apiResponse from "../utils/apiResponse.js";
+import { gigs } from "../models/gigs.model.js";
 import { apiError } from "../utils/apiError.js";
-import {gigs} from "../models/gigs.model.js";
+import apiResponse from "../utils/apiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const signUpClient = asyncHandler ( async (req , res) => {
     try {
@@ -395,6 +395,7 @@ const changeOrganisation = asyncHandler(async (req, res) => {
 
 const postGig = asyncHandler ( async (req , res) => {
     const {title , description , deadline , budget , skills_req , payment_option} = req.body;
+    // console.log(req.user._id);
     const client_id = req.user._id
     // console.log (req.body)
     // console.log(title, description, deadline, budget, skills_req , payment_option , _id);
@@ -456,18 +457,8 @@ const selectHustler = asyncHandler ( async (req , res) => {
 
 
 
-export  {
+export {
+    changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, postGig, selectHustler, signOutClient, signUpClient, updateAvatar,
+    updateCoverImage
+};
 
-    signUpClient,
-    signOutClient,
-    postGig,
-    changePassword,
-    changeEmail,
-    changeUsername,
-    changeAddress,
-    updateAvatar,
-    updateCoverImage,
-    changeContactNumber,
-    changeOrganisation,
-    selectHustler
-} ;
