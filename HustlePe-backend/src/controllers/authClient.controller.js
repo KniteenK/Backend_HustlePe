@@ -397,7 +397,7 @@ const postGig = asyncHandler ( async (req , res) => {
     const {title , description , deadline , budget , skills_req , payment_option} = req.body;
     // console.log(req.user._id);
     const client_id = req.user._id
-    // console.log (req.body)
+    console.log (req.body)
     // console.log(title, description, deadline, budget, skills_req , payment_option , _id);
     try {
         if (

@@ -45,6 +45,8 @@ const signIn = asyncHandler(async (req, res) => {
         const accessToken = await user.generateAccessToken();
         const refreshToken = await user.generateRefreshToken();
 
+        console.log('accessToken:', accessToken);
+
         // Save refreshToken in the user document
         user.refreshToken = refreshToken;
         await user.save({ validateBeforeSave: false });
