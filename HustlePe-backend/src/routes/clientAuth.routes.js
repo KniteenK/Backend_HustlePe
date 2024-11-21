@@ -1,5 +1,5 @@
 import express from "express";
-import { signOutClient , signUpClient , postGig, changePassword , changeEmail , changeUsername, changeAddress, updateAvatar , updateCoverImage , changeContactNumber , changeOrganisation, } from "../controllers/authClient.controller.js"; 
+import { changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, postGig, signOutClient, signUpClient, updateAvatar, updateCoverImage, } from "../controllers/authClient.controller.js";
 import signIn from "../controllers/signIn.controller.js";
 import { verifyClientJWT } from "../middlewares/auth.middleware.js";
 const router = express.Router();
