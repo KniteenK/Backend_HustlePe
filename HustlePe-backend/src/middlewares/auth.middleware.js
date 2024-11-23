@@ -31,32 +31,41 @@ const verifyHustlerJWT = asyncHandler( async (req, _ , next) => {
     }
 
 });
-
-const verifyClientJWT = asyncHandler( async (req, _ , next) => {
+const verifyClientJWT = asyncHandler(async (req, _, next) => {
     try {
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "") ;
-        console.log(token)
+        let token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+        console.log("Raw Token:", JSON.stringify(token));
+
+        // Remove extra quotes if present
+        token = token?.replace(/^"|"$/g, "");
+
         if (!token) {
-            throw new apiError(401 , "Unauthorized request");
+            throw new apiError(401, "Unauthorized request: No token provided");
         }
-    
-        const isAuthorized = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET) ;
-    
-        const user = await client.findById (isAuthorized._id).select(
+
+        const isAuthorized = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        const user = await client.findById(isAuthorized._id).select(
             "-password -refreshToken"
-        )
+        );
 
         if (!user) {
-            throw new apiError(401 ,"Unauthorized request");
+            throw new apiError(401, "Unauthorized request: User not found");
         }
 
-        req.user = user ;
+        req.user = user; // Attach user to the request object
         next();
-        
     } catch (error) {
-        throw new apiError(401 , error?.message || "Unauthorized request")
+        if (error.name === "JsonWebTokenError") {
+            throw new apiError(401, "Invalid Token");
+        } else if (error.name === "TokenExpiredError") {
+            throw new apiError(401, "Token has expired");
+        } else {
+            throw new apiError(401, error?.message || "Unauthorized request");
+        }
     }
 });
+
 
 export {
     verifyClientJWT, verifyHustlerJWT
