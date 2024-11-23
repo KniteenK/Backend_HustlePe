@@ -10,7 +10,7 @@ router.route('/signUpClient').post(signUpClient);
 
 router.route('/signInClient').post(signIn);
 
-router.route('/signOutClient').post(signOutClient);
+router.route('/signOutClient').post(verifyClientJWT, signOutClient);
 
 router.route('/changePassword').patch(changePassword);
 

@@ -5,6 +5,7 @@ import {
     getUser,
     refreshAccessToken,
     signUpHustler,
+    signOutHustler,
     updateAvatar,
     updateCoverImage
 } from '../controllers/authHustler.controller.js';
@@ -32,7 +33,7 @@ router.route('/signUpHustler').post(upload.fields([
 
 // Hustlers Routes
 router.route('/signInHustler').post(signIn) ;
-// router.route('/logoutHustler').post(verifyHustlerJWT , logoutHustler) ;
+router.route('/signOutHustler').post(verifyHustlerJWT , signOutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
 
 router.route('/updateAvatar').patch(updateAvatar);

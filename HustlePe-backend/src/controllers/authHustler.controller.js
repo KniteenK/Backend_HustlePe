@@ -256,12 +256,37 @@ const applyToJob = asyncHandler (async (req , res) => {
     )
 })
 
+const signOutHustler = asyncHandler(async (req, res) => {
+    await Hustler.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset: {
+                accessToken: 1
+            }
+        },
+        { 
+            new: true  
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new apiResponse(200, {}, "User logged Out Successfully"))
+});
+
 export {
     applyToJob, changePassword,
     getUser,
     logoutHustler,
     refreshAccessToken,
     signUpHustler,
+    signOutHustler,
     updateAvatar,
     updateCoverImage
 };
