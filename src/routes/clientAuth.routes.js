@@ -2,6 +2,7 @@ import express from "express";
 import { changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, postGig, signOutClient, signUpClient, updateAvatar, updateCoverImage, } from "../controllers/authClient.controller.js";
 import signIn from "../controllers/signIn.controller.js";
 import { verifyClientJWT } from "../middlewares/auth.middleware.js";
+import { getGigsByClient } from "../controllers/gig.controller.js";
 const router = express.Router();
 
 router.route('/postGig').post(verifyClientJWT ,postGig);
@@ -27,4 +28,7 @@ router.route('/updateCoverImage').patch(updateCoverImage);
 router.route('/changeContactNumber').patch(changeContactNumber);
 
 router.route('/changeOrganisation').patch(changeOrganisation);
+
+router.route('/getGigs').get(getGigsByClient) ;
+
 export default router;

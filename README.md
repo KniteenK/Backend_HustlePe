@@ -5,4 +5,4 @@ The backend implementation for the HustlePe platform
 Now you can setup using docker
 run:
 docker compose build
-docker compose up
+docker compose up -d
