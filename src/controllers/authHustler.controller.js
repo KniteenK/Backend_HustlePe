@@ -144,7 +144,7 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
 
 const changePassword = asyncHandler( async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-
+    console.log('req', req);
     const user = await Hustler.findById(req?._id) ;
 
     if (!user) {
@@ -284,10 +284,7 @@ export {
     applyToJob, changePassword,
     getUser,
     logoutHustler,
-    refreshAccessToken,
-    signUpHustler,
-    signOutHustler,
-    updateAvatar,
+    refreshAccessToken, signOutHustler, signUpHustler, updateAvatar,
     updateCoverImage
 };
 

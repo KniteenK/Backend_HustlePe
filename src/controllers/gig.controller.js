@@ -7,16 +7,31 @@ const getGigs = async (req, res) => {
     console.log("Request Body:", req.body);
     console.log(skillsArray, sortBy, order, page, limit);
 
+
+const getGigs = async (req, res) => {
+    const { skillsArray = [], sortBy = 'createdAt', order = -1, page = 1, limit = 100 } = req.body;
+    console.log("Request Body:", req.body);
+    console.log(skillsArray, sortBy, order, page, limit);
+
+
+
     try {
         const sortOptions = {};
         sortOptions[sortBy] = order;
 
         // Filter out empty strings from skillsArray
         const filteredSkillsArray = skillsArray.filter(skill => skill.trim() !== "");
+
+        // console.log("Filtered Skills Array:", filteredSkillsArray);
+
+        const query = filteredSkillsArray.length > 0 ? { skills_req: { $in: filteredSkillsArray } } : {};
+        // console.log("Query:", query);
+
         console.log("Filtered Skills Array:", filteredSkillsArray);
 
         const query = filteredSkillsArray.length > 0 ? { skills_req: { $in: filteredSkillsArray } } : {};
         console.log("Query:", query);
+
 
         const jobs = await gigs.find(query)
             .sort(sortOptions)
