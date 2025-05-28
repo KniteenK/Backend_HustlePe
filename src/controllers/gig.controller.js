@@ -12,10 +12,10 @@ const getGigs = async (req, res) => {
 
         // Filter out empty strings from skillsArray
         const filteredSkillsArray = skillsArray.filter(skill => skill.trim() !== "");
-        console.log("Filtered Skills Array:", filteredSkillsArray);
+        // console.log("Filtered Skills Array:", filteredSkillsArray);
 
         const query = filteredSkillsArray.length > 0 ? { skills_req: { $in: filteredSkillsArray } } : {};
-        console.log("Query:", query);
+        // console.log("Query:", query);
 
         const jobs = await gigs.find(query)
             .sort(sortOptions)
