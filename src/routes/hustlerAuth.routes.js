@@ -36,10 +36,10 @@ router.route('/signInHustler').post(signIn) ;
 router.route('/signOutHustler').post(verifyHustlerJWT , signOutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
 
-router.route('/updateAvatar').patch(updateAvatar);
-router.route('/updateCoverImage').patch(updateCoverImage);
-router.route('/changePassword').patch(changePassword);
-router.route('/applyToJob').post(applyToJob);
+router.route('/updateAvatar').patch(verifyHustlerJWT, updateAvatar);
+router.route('/updateCoverImage').patch(verifyHustlerJWT, updateCoverImage);
+router.route('/changePassword').patch(verifyHustlerJWT, changePassword);
+router.route('/applyToJob').post(verifyHustlerJWT, applyToJob);
 router.route('/getUser').get(verifyHustlerJWT , getUser) ;
 
 // get all the jobs or search with filters
