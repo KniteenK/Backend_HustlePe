@@ -58,6 +58,14 @@ export const findOrganization = asyncHandler(async (req, res) => {
     return res.status(200).json(new apiResponse(200, org, "Organization found"));
 });
 
+// Find all organizations
+export const findAllOrganizations = asyncHandler(async (req, res) => {
+    const orgs = await organization.find()
+        .populate("founder", "username email")
+        .populate("members.hustler", "username email");
+    return res.status(200).json(new apiResponse(200, orgs, "All organizations fetched successfully"));
+});
+
 // Delete organization by ID
 export const deleteOrganization = asyncHandler(async (req, res) => {
     const { id } = req.params;
