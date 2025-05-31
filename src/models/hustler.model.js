@@ -1,6 +1,43 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt" ;
-import jwt from "jsonwebtoken" 
+
+// Testimonial sub-schema
+const testimonialSchema = new mongoose.Schema({
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'client',
+        required: true
+    },
+    text: {
+        type: String,
+        default: ''
+    },
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5
+    }
+}, { _id: false });
+
+// Gig rating sub-schema
+const gigRatingSchema = new mongoose.Schema({
+    gig: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'gigs',
+        required: true
+    },
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true
+    },
+    feedback: {
+        type: String,
+        default: ''
+    }
+}, { _id: false });
 
 const hustlerSchema = new mongoose.Schema({
     username: {
@@ -126,26 +163,13 @@ const hustlerSchema = new mongoose.Schema({
             type: String,
         },
     }],
-    ratings: {
+    rating: {
         type: Number ,
         default: 1,
         min: 1,
         max: 5,
     },
-    certifications: [{
-        name: {
-            type: String,
-        },
-        institution: {
-            type: String,
-        },
-        date_of_issue: {
-            type: Date,
-        },
-        certificate_url: {
-            type: String,
-        },
-    }],
+    testimonials: [testimonialSchema],
     current_gig: [{
         type: mongoose.Schema.Types.ObjectId , 
         ref: 'gigs',
@@ -174,16 +198,18 @@ const hustlerSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    testimonials: [{
-        type: String , 
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'client',
-        rating: Number
-    }],
     role: {
         type: String ,
         default: "HUSTLER" ,
-    }
+    },
+    // Codeforces-like overall rating
+    overall_rating: {
+        type: Number,
+        default: 0, // Typical starting rating
+        min: 0
+    },
+    // Individual gig ratings
+    gig_ratings: [gigRatingSchema],
 
 }, {timestamps: true}) ;
 

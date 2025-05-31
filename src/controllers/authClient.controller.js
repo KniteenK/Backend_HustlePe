@@ -57,6 +57,7 @@ const signUpClient = asyncHandler ( async (req , res) => {
             avatar: uploadedAvatar?.url || 'https://static.vecteezy.com/system/resources/thumbnails/027/951/137/small_2x/stylish-spectacles-guy-3d-avatar-character-illustrations-png.png',
             coverImage: uploadedCoverImage?.url || "",
             role: "client"
+            // overall_rating and gig_ratings will be set by default in schema
         }) ;
     
         if (!isClient) {
@@ -394,7 +395,7 @@ const changeOrganisation = asyncHandler(async (req, res) => {
 
 
 const postGig = asyncHandler ( async (req , res) => {
-    const {title , description , deadline , budget , skills_req , payment_option} = req.body;
+    const {title , description , deadline , budget , skills_req , payment_option, milestones} = req.body;
     // console.log(req.user._id);
     const client_id = req.user._id
     console.log (req.body)
@@ -407,7 +408,7 @@ const postGig = asyncHandler ( async (req , res) => {
             throw new Error("All fields are required") ;
         }
     
-        const gig = await gigs.create({
+        const gigData = {
             title,
             description,
             client_id,
@@ -415,7 +416,14 @@ const postGig = asyncHandler ( async (req , res) => {
             budget,
             skills_req,
             payment_option,
-        }) ;
+        };
+
+        // If payment_option is 'milestone', include milestones array
+        if (payment_option === 'milestone' && Array.isArray(milestones)) {
+            gigData.milestones = milestones;
+        }
+
+        const gig = await gigs.create(gigData) ;
         res.status(201).json(
             new apiResponse(201, gig, "Gig created successfully")
         );

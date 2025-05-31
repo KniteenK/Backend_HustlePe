@@ -59,6 +59,7 @@ const getGigs = async (req, res) => {
     }
 };
 
+
 export const getGigsByClient = async (req, res) => {
   try {
       const { client_id } = req.body;
@@ -83,5 +84,6 @@ export const getGigsByClient = async (req, res) => {
       return res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 export default getGigs;

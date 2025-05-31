@@ -1,6 +1,25 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import mongoose from 'mongoose';
-import bcrypt from "bcrypt" ;
-import jwt from "jsonwebtoken" 
+
+// Sub-schema for ratings given to client for each gig
+const gigRatingSchema = new mongoose.Schema({
+    gig: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'gigs',
+        required: true
+    },
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true
+    },
+    feedback: {
+        type: String,
+        default: ''
+    }
+}, { _id: false });
 
 const clientSchema = new mongoose.Schema({
     username: {
@@ -45,25 +64,26 @@ const clientSchema = new mongoose.Schema({
       refreshToken: {
         type: String,
       },
-    organisation: {
+      organisation: {
         type: String,
         required: true,
     }, 
     current_gigs: [{
         type: mongoose.Schema.Types.ObjectId , 
-        ref: 'Gig',
+        ref: 'gigs',
     }] ,
     past_gigs: [{
         type: mongoose.Schema.Types.ObjectId , 
-        ref: 'Gig',
+        ref: 'gigs',
     }] ,
-
-    ratings: {
+    // Codeforces-like overall rating for client
+    overall_rating: {
         type: Number,
-        default: 1,
-        min: 1,
-        max: 5,
+        default: 0,
+        min: 0
     },
+    // Individual gig ratings for client
+    gig_ratings: [gigRatingSchema],
     dollars_spent: {
         type: Number,
     },
