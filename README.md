@@ -2,6 +2,7 @@
 
 The backend implementation for the HustlePe platform
 
+
 ## Getting Started
 
 1. **Clone the repository**  
@@ -30,3 +31,13 @@ The backend implementation for the HustlePe platform
    ```
 
 The server should now be running and connected to your configured services.
+
+Now you can setup using docker
+run:
+```
+docker compose build
+docker compose up -d
+```
+
+Frontend repo - https://github.com/KniteenK/HustlePe-frontend
+
