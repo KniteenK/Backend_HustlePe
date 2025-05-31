@@ -24,4 +24,7 @@ app.use('/api/v1/hustler', hustlerRouter) ;
 import clientRouter from './routes/clientAuth.routes.js';
 app.use('/api/v1/client', clientRouter) ;
  
+import organizationRouter from './routes/organization.routes.js';
+app.use('/api/v1/organization', organizationRouter);
+
 export default app ;

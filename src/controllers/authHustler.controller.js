@@ -57,6 +57,7 @@ const signUpHustler = asyncHandler(async (req, res) => {
             country
         },
         role: "hustler",
+        // overall_rating and gig_ratings will be set by default in schema
     });
 
     const isCreated = await Hustler.findById(user._id).select("-password -refreshToken");

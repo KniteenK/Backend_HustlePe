@@ -43,4 +43,6 @@ const getGigs = async (req, res) => {
     }
 };
 
+// No changes needed for rating fields here
+
 export default getGigs;
