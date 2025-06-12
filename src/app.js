@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { configDotenv } from 'dotenv';
 import express from 'express';
+import { Server } from "socket.io";
 
 configDotenv() ;
 
