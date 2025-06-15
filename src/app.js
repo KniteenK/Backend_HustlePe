@@ -2,7 +2,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { configDotenv } from 'dotenv';
 import express from 'express';
-import { Server } from "socket.io";
 
 configDotenv() ;
 
@@ -28,4 +27,23 @@ app.use('/api/v1/client', clientRouter) ;
 import organizationRouter from './routes/organization.routes.js';
 app.use('/api/v1/organization', organizationRouter);
 
-export default app ;
+export default app;
+
+// --- Move the following to your main entry file (e.g., src/index.js) ---
+// import http from 'http';
+// import { Server } from "socket.io";
+// import app from './app.js';
+
+// const server = http.createServer(app);
+// const io = new Server(server, { /* options */ });
+
+// io.on("connection", (socket) => {
+//   console.log("A user connected:", socket.id);
+//   socket.on("disconnect", () => {
+//     console.log("A user disconnected:", socket.id);
+//   });
+// });
+
+// server.listen(process.env.PORT || 3000, () => {
+//   console.log("Server running...");
+// });
