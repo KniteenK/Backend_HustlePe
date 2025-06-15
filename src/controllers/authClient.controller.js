@@ -125,7 +125,7 @@ const changeEmail=  asyncHandler(async (req, res) => {
         throw new apiError(400, "Email is required");
     }   
 
-    const user = client.findById(req.user._id);
+    const user = await client.findById(req.user._id);
     if(!user){
         throw new apiError(404, "Client not found");
     }
@@ -246,7 +246,10 @@ const changeAddress = asyncHandler(async (req, res) => {
     }
 
     try{
-        isClient.address = `${city}, ${country}`;
+        isClient.address = {
+            city,
+            country
+        };
 
         const changedaddr= await isClient.save({ validateBeforeSave: false });
 
@@ -335,7 +338,7 @@ const changeContactNumber = asyncHandler(async (req, res) => {
         throw new apiError(400, "Contact number is required");
     }
 
-    const user=await client.findById(req.user._id);
+    const user=await client.findById(req.user._id); 
     if(!user){
         throw new apiError(404, "Client not found");
     }
@@ -440,7 +443,7 @@ const selectHustler = asyncHandler ( async (req , res) => {
             throw new apiError(400, "Gig ID and Hustler ID are required");
         }
         
-        gigs.findByIdAndUpdate(
+        await gigs.findByIdAndUpdate(
             gigId ,
             {
                 $set: {
@@ -463,10 +466,18 @@ const selectHustler = asyncHandler ( async (req , res) => {
 
 })
 
+// Fetch all gigs posted by the authenticated client
+const fetchClientGigs = asyncHandler(async (req, res) => {
+    const clientId = req.user._id;
+    const clientGigs = await gigs.find({ client_id: clientId });
+    return res.status(200).json(
+        new apiResponse(200, clientGigs, "All gigs posted by this client fetched successfully")
+    );
+});
 
 
 export {
-    changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, postGig, selectHustler, signOutClient, signUpClient, updateAvatar,
+    changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, fetchClientGigs, postGig, selectHustler, signOutClient, signUpClient, updateAvatar,
     updateCoverImage
 };
 

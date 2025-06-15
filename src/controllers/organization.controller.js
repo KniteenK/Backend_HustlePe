@@ -131,3 +131,9 @@ export const organizationGigsGallery = asyncHandler(async (req, res) => {
         pastGigs
     }, "Organization gigs gallery fetched successfully"));
 });
+
+// Fetch all gigs posted
+export const fetchAllGigs = asyncHandler(async (req, res) => {
+    const allGigs = await gigs.find();
+    return res.status(200).json(new apiResponse(200, allGigs, "All gigs fetched successfully"));
+});

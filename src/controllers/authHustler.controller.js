@@ -145,26 +145,26 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
 
 const changePassword = asyncHandler( async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    console.log('req', req);
-    const user = await Hustler.findById(req?._id) ;
+    // Use req.user._id from middleware
+    const user = await Hustler.findById(req.user._id);
 
     if (!user) {
         throw new apiError(404, "User not found");
     }
 
-    const isPasswordMatch = await user.isPasswordCorrect(currentPassword) ;
+    const isPasswordMatch = await user.isPasswordCorrect(currentPassword);
 
     if (!isPasswordMatch) {
         throw new apiError(401, "Invalid password");
     }
 
-    user.password =  newPassword;
+    user.password = newPassword;
     await user.save({validateBeforeSave: false});
 
     return res.status(200)
     .json(
-        new apiResponse(200, {}, "Password changed successfully"
-    ));
+        new apiResponse(200, {}, "Password changed successfully")
+    );
 })
 
 const getUser = asyncHandler (async (req , res) => {
@@ -188,7 +188,7 @@ const updateAvatar = asyncHandler (async (req , res) => {
     }
 
     const user = await Hustler.findByIdAndUpdate(
-        req.user._id,
+        req.user._id, // Use ID from middleware
         {
             $set: {
                 avatar: uploadedAvatar.url
@@ -220,7 +220,7 @@ const updateCoverImage = asyncHandler (async (req , res) => {
     }
 
     const user = await Hustler.findByIdAndUpdate(
-        req.user._id,
+        req.user._id, // Use ID from middleware
         {
             $set: {
                 coverImage: uploadedCover.url
@@ -239,11 +239,13 @@ const updateCoverImage = asyncHandler (async (req , res) => {
 })
 
 const applyToJob = asyncHandler (async (req , res) => {
-    const {gig_id ,hustler_id , cover_letter} = req.body ;
+    const { gig_id, cover_letter } = req.body;
+    // Use hustler_id from req.user._id
+    const hustler_id = req.user._id;
 
     const app = await Application.create({
-        gig_id ,
-        hustler_id ,
+        gig_id,
+        hustler_id,
         cover_letter
     })
 
@@ -259,7 +261,7 @@ const applyToJob = asyncHandler (async (req , res) => {
 
 const signOutHustler = asyncHandler(async (req, res) => {
     await Hustler.findByIdAndUpdate(
-        req.user._id,
+        req.user._id, // Use ID from middleware
         {
             $unset: {
                 accessToken: 1
