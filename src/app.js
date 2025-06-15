@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { configDotenv } from 'dotenv';
 import express from 'express';
+import { Chat } from './models/chat.model.js';
 
 configDotenv() ;
 
@@ -26,6 +27,18 @@ app.use('/api/v1/client', clientRouter) ;
  
 import organizationRouter from './routes/organization.routes.js';
 app.use('/api/v1/organization', organizationRouter);
+
+// REST endpoint to get chat history between hustler and client
+app.get('/api/v1/chat/history', async (req, res) => {
+    const { hustlerId, clientId } = req.query;
+    if (!hustlerId || !clientId) {
+        return res.status(400).json({ error: "hustlerId and clientId are required" });
+    }
+    // Use the same roomId logic as in socket.js
+    const roomId = [String(hustlerId), String(clientId)].sort().join("_");
+    const history = await Chat.find({ roomId }).sort({ timestamp: 1 });
+    res.status(200).json({ history });
+});
 
 export default app;
 
