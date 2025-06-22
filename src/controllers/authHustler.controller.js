@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Application } from "../models/application.model.js";
 import { Hustler } from "../models/hustler.model.js";
+import { Proposal } from "../models/proposal.model.js"; // You need to create this model
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -238,56 +239,126 @@ const updateCoverImage = asyncHandler (async (req , res) => {
 
 })
 
-const applyToJob = asyncHandler (async (req , res) => {
-    const { gig_id, cover_letter } = req.body;
-    // Use hustler_id from req.user._id
-    const hustler_id = req.user._id;
-
-    const app = await Application.create({
+// Controller for hustler to apply to a job/gig (using Proposal model)
+const applyToJob = asyncHandler(async (req, res) => {
+    const hustlerId = req.user._id;
+    const {
         gig_id,
-        hustler_id,
-        cover_letter
-    })
+        cover_letter,
+        expected_budget,
+        budget_type, // "fixed", "hourly", "negotiable", etc.
+        estimated_timeline, // e.g. "7 days", "2 weeks"
+        availability, // e.g. "Immediate", "Next week"
+        working_hours // e.g. "9am-5pm IST"
+    } = req.body;
 
-    if (!app) {
-        throw new apiError(500, "Failed to apply to job")
+    if (!gig_id || !cover_letter) {
+        throw new apiError(400, "Gig ID and cover letter are required");
     }
 
-    return res.status(200)
-    .json(
-        new apiResponse(200, app, "Applied to job successfully")
-    )
-})
+    // Prevent duplicate applications by the same hustler to the same gig
+    const existing = await Proposal.findOne({ gig: gig_id, hustler: hustlerId });
+    if (existing) {
+        throw new apiError(409, "You have already applied to this job");
+    }
 
+    const proposal = await Proposal.create({
+        gig: gig_id,
+        hustler: hustlerId,
+        cover_letter,
+        expected_budget,
+        budget_type,
+        estimated_timeline,
+        availability,
+        working_hours,
+        status: "pending"
+    });
+
+    if (!proposal) {
+        throw new apiError(500, "Failed to apply to job");
+    }
+
+    return res.status(201).json(
+        new apiResponse(201, proposal, "Applied to job successfully")
+    );
+});
+
+// Accept a proposal (client accepts hustler's proposal)
+const acceptProposal = asyncHandler(async (req, res) => {
+    const { proposal_id } = req.body;
+    if (!proposal_id) {
+        throw new apiError(400, "Proposal ID is required");
+    }
+
+    const proposal = await Proposal.findById(proposal_id);
+    if (!proposal) {
+        throw new apiError(404, "Proposal not found");
+    }
+
+    proposal.status = "accepted";
+    await proposal.save();
+
+    // Optionally, assign hustler to gig here
+
+    return res.status(200).json(
+        new apiResponse(200, proposal, "Proposal accepted")
+    );
+});
+
+   
 const signOutHustler = asyncHandler(async (req, res) => {
-    await Hustler.findByIdAndUpdate(
-        req.user._id, // Use ID from middleware
-        {
-            $unset: {
-                accessToken: 1
-            }
-        },
-        { 
-            new: true  
-        }
-    )
-    const options = {
-        httpOnly: true,
-        secure: true
+       await Hustler.findByIdAndUpdate(
+           req.user._id, // Use ID from middleware
+           {
+               $unset: {
+                   accessToken: 1
+               }
+           },
+           { 
+               new: true  
+           }
+       )
+       const options = {
+           httpOnly: true,
+           secure: true
+       }
+   
+       return res
+       .status(200)
+       .clearCookie("accessToken", options)
+       .clearCookie("refreshToken", options)
+       .json(new apiResponse(200, {}, "User logged Out Successfully"))
+   });
+
+// View all proposals for a gig (with hustler avatar and info)
+const getProposalsForGig = asyncHandler(async (req, res) => {
+    const { gig_id } = req.params;
+    if (!gig_id) {
+        throw new apiError(400, "Gig ID is required");
     }
 
-    return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json(new apiResponse(200, {}, "User logged Out Successfully"))
+    const proposals = await Proposal.find({ gig: gig_id })
+        .populate({
+            path: "hustler",
+            select: "username avatar first_name last_name rating skills"
+        })
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new apiResponse(200, proposals, "Proposals fetched successfully")
+    );
 });
 
 export {
-    applyToJob, changePassword,
+    acceptProposal,
+    applyToJob,
+    changePassword,
+    getProposalsForGig,
     getUser,
     logoutHustler,
-    refreshAccessToken, signOutHustler, signUpHustler, updateAvatar,
+    refreshAccessToken,
+    signOutHustler,
+    signUpHustler,
+    updateAvatar,
     updateCoverImage
 };
-
