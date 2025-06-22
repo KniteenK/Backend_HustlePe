@@ -72,4 +72,35 @@ export const getGigsByClient = async (req, res) => {
   }
 };
 
+export const getGigById = async (req, res) => {
+    try {
+        const { gig_id } = req.params;
+        if (!gig_id) {
+            return res.status(400).json({ error: 'Gig ID is required' });
+        }
+
+        const gig = await gigs.findById(gig_id);
+        if (!gig) {
+            return res.status(404).json({ error: 'Gig not found' });
+        }
+
+        return res.status(200).json(
+            new apiResponse(
+                200,
+                gig,
+                "Gig fetched successfully"
+            )
+        );
+    } catch (error) {
+        console.error("Error fetching gig by id:", error);
+        return res.status(500).json(
+            new apiResponse(
+                500,
+                null,
+                "An error occurred while fetching the gig"
+            )
+        );
+    }
+};
+
 export default getGigs;

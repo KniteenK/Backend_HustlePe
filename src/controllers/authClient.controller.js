@@ -1,5 +1,6 @@
 import { client } from "../models/client.model.js";
 import { gigs } from "../models/gigs.model.js";
+import { Proposal } from "../models/proposal.model.js";
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -125,7 +126,7 @@ const changeEmail=  asyncHandler(async (req, res) => {
         throw new apiError(400, "Email is required");
     }   
 
-    const user = client.findById(req.user._id);
+    const user = await client.findById(req.user._id);
     if(!user){
         throw new apiError(404, "Client not found");
     }
@@ -246,7 +247,10 @@ const changeAddress = asyncHandler(async (req, res) => {
     }
 
     try{
-        isClient.address = `${city}, ${country}`;
+        isClient.address = {
+            city,
+            country
+        };
 
         const changedaddr= await isClient.save({ validateBeforeSave: false });
 
@@ -335,7 +339,7 @@ const changeContactNumber = asyncHandler(async (req, res) => {
         throw new apiError(400, "Contact number is required");
     }
 
-    const user=await client.findById(req.user._id);
+    const user=await client.findById(req.user._id); 
     if(!user){
         throw new apiError(404, "Client not found");
     }
@@ -440,7 +444,7 @@ const selectHustler = asyncHandler ( async (req , res) => {
             throw new apiError(400, "Gig ID and Hustler ID are required");
         }
         
-        gigs.findByIdAndUpdate(
+        await gigs.findByIdAndUpdate(
             gigId ,
             {
                 $set: {
@@ -463,10 +467,131 @@ const selectHustler = asyncHandler ( async (req , res) => {
 
 })
 
+// Fetch all gigs posted by the authenticated client
+const fetchClientGigs = asyncHandler(async (req, res) => {
+    const clientId = req.user._id;
+    const clientGigs = await gigs.find({ client_id: clientId });
+    return res.status(200).json(
+        new apiResponse(200, clientGigs, "All gigs posted by this client fetched successfully")
+    );
+});
 
+// Fetch all proposals for a particular gig (job) posted by the authenticated client
+const getProposalsForJob = asyncHandler(async (req, res) => {
+    const { gig_id } = req.params;
+    if (!gig_id) {
+        throw new apiError(400, "Gig ID is required");
+    }
+
+    // Ensure the gig belongs to the authenticated client
+    const gig = await gigs.findOne({ _id: gig_id, client_id: req.user._id });
+    if (!gig) {
+        throw new apiError(403, "You are not authorized to view proposals for this gig");
+    }
+
+    const proposals = await Proposal.find({ gig: gig_id })
+        .populate({
+            path: "hustler",
+            select: "-password -refreshToken" // fetch all hustler details except sensitive
+        })
+        .populate({
+            path: "gig",
+            select: "-__v" // fetch all gig details except __v
+        })
+        .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new apiResponse(200, proposals, "Proposals with all details fetched successfully")
+    );
+});
+
+// Accept a proposal (client accepts hustler's proposal)
+const acceptProposal = asyncHandler(async (req, res) => {
+    const proposal_id = req.body.proposalId;
+    if (!proposal_id) {
+        throw new apiError(400, "Proposal ID is required");
+    }
+
+    // Find the proposal
+    const proposal = await Proposal.findById(proposal_id);
+    if (!proposal) {
+        throw new apiError(404, "Proposal not found");
+    }
+
+    // Ensure the gig belongs to the authenticated client
+    const gig = await gigs.findOne({ _id: proposal.gig, client_id: req.user._id });
+    if (!gig) {
+        throw new apiError(403, "You are not authorized to accept this proposal");
+    }
+
+    // Accept this proposal
+    proposal.status = "accepted";
+    await proposal.save();
+
+    // Reject all other proposals for this gig
+    await Proposal.updateMany(
+        { gig: proposal.gig, _id: { $ne: proposal._id } },
+        { $set: { status: "rejected" } }
+    );
+
+    // Assign hustler to gig and update gig status
+    gig.assigned_hustler = proposal.hustler;
+    gig.status = "closed";
+    await gig.save();
+
+    return res.status(200).json(
+        new apiResponse(200, proposal, "Proposal accepted and gig updated")
+    );
+});
+
+// Reject a proposal (client rejects hustler's proposal)
+const rejectProposal = asyncHandler(async (req, res) => {
+    const proposal_id = req.body.proposalId;
+    if (!proposal_id) {
+        throw new apiError(400, "Proposal ID is required");
+    }
+
+    // Find the proposal
+    const proposal = await Proposal.findById(proposal_id);
+    if (!proposal) {
+        throw new apiError(404, "Proposal not found");
+    }
+
+    // Ensure the gig belongs to the authenticated client
+    const gig = await gigs.findOne({ _id: proposal.gig, client_id: req.user._id });
+    if (!gig) {
+        throw new apiError(403, "You are not authorized to reject this proposal");
+    }
+
+    // Only allow rejection if not already accepted or rejected
+    if (proposal.status === "accepted") {
+        throw new apiError(400, "Cannot reject an already accepted proposal");
+    }
+    if (proposal.status === "rejected") {
+        throw new apiError(400, "Proposal is already rejected");
+    }
+
+    proposal.status = "rejected";
+    await proposal.save();
+
+    return res.status(200).json(
+        new apiResponse(200, proposal, "Proposal rejected successfully")
+    );
+});
 
 export {
-    changeAddress, changeContactNumber, changeEmail, changeOrganisation, changePassword, changeUsername, postGig, selectHustler, signOutClient, signUpClient, updateAvatar,
+    acceptProposal, changeAddress,
+    changeContactNumber,
+    changeEmail,
+    changeOrganisation,
+    changePassword,
+    changeUsername,
+    fetchClientGigs,
+    getProposalsForJob,
+    postGig, rejectProposal, selectHustler,
+    signOutClient,
+    signUpClient,
+    updateAvatar,
     updateCoverImage
 };
 
