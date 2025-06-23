@@ -1,5 +1,7 @@
 import { gigs } from "../models/gigs.model.js";
 import apiResponse from "../utils/apiResponse.js";
+// Import Proposal model for status refresh
+import { Proposal } from "../models/proposal.model.js";
 
 const getGigs = async (req, res) => {
     const { skillsArray = [], sortBy = 'createdAt', order = -1, page = 1, limit = 100 } = req.body;
@@ -26,7 +28,16 @@ const getGigs = async (req, res) => {
             // .skip((page - 1) * limit)
             // .limit(limit);
 
-        // console.log("Fetched Jobs:", jobs);
+        // --- Refresh gig status logic ---
+        for (const job of jobs) {
+            const acceptedProposal = await Proposal.findOne({ gig: job._id, status: "accepted" });
+            if (acceptedProposal && job.status !== "assigned") {
+                job.status = "assigned";
+                job.assignedHustler = acceptedProposal.hustler;
+                await job.save();
+            }
+        }
+        // --- End refresh gig status logic ---
 
         return res.status(200).json(
             new apiResponse(
@@ -83,6 +94,15 @@ export const getGigById = async (req, res) => {
         if (!gig) {
             return res.status(404).json({ error: 'Gig not found' });
         }
+
+        // --- Refresh gig status logic ---
+        const acceptedProposal = await Proposal.findOne({ gig: gig._id, status: "accepted" });
+        if (acceptedProposal && gig.status !== "assigned") {
+            gig.status = "assigned";
+            gig.assignedHustler = acceptedProposal.hustler;
+            await gig.save();
+        }
+        // --- End refresh gig status logic ---
 
         return res.status(200).json(
             new apiResponse(

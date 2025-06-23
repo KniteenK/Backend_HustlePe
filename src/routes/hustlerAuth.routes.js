@@ -6,6 +6,7 @@ import {
     getProposalsForGig,
     getUser,
     refreshAccessToken,
+    getAssignedGigsForHustler,
     signOutHustler,
     signUpHustler,
     updateAvatar,
@@ -37,7 +38,7 @@ router.route('/signUpHustler').post(upload.fields([
 router.route('/signInHustler').post(signIn) ;
 router.route('/signOutHustler').post(verifyHustlerJWT , signOutHustler) ;
 router.route('/refreshToken').post(refreshAccessToken) ;
-
+router.route('/getAssignedGigs').post(getAssignedGigsForHustler) ;
 router.route('/updateAvatar').patch(verifyHustlerJWT, updateAvatar);
 router.route('/updateCoverImage').patch(verifyHustlerJWT, updateCoverImage);
 router.route('/changePassword').patch(verifyHustlerJWT, changePassword);

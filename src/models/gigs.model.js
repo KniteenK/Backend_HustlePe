@@ -44,7 +44,7 @@ const gigSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['open' , 'closed'],
+        enum: ['open' , 'closed', 'assigned'],
         default: 'open',
     },
     skills_req: [{

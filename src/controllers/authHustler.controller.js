@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Application } from "../models/application.model.js";
+import { gigs } from "../models/gigs.model.js";
 import { Hustler } from "../models/hustler.model.js";
 import { Proposal } from "../models/proposal.model.js"; // You need to create this model
 import { apiError } from "../utils/apiError.js";
@@ -298,13 +298,24 @@ const acceptProposal = asyncHandler(async (req, res) => {
     proposal.status = "accepted";
     await proposal.save();
 
-    // Optionally, assign hustler to gig here
+    // Update the gig to assign the hustler
+    const gig = await gigs.findById(proposal.gig);
+    if (gig) {
+        gig.assigned_hustler = proposal.hustler;
+        gig.status = "assigned";
+        await gig.save();
+    }
+
+    // Add this gig to the hustler's current_gig array if not already present
+    await Hustler.findByIdAndUpdate(
+        proposal.hustler,
+        { $addToSet: { current_gig: proposal.gig } }
+    );
 
     return res.status(200).json(
         new apiResponse(200, proposal, "Proposal accepted")
     );
 });
-
    
 const signOutHustler = asyncHandler(async (req, res) => {
        await Hustler.findByIdAndUpdate(
@@ -337,6 +348,7 @@ const getProposalsForGig = asyncHandler(async (req, res) => {
         throw new apiError(400, "Gig ID is required");
     }
 
+    // Fetch proposals
     const proposals = await Proposal.find({ gig: gig_id })
         .populate({
             path: "hustler",
@@ -344,8 +356,52 @@ const getProposalsForGig = asyncHandler(async (req, res) => {
         })
         .sort({ createdAt: -1 });
 
+    // --- Refresh gig status logic ---
+    // Only run if there are proposals
+    if (proposals && proposals.length > 0) {
+        // Find if any proposal is accepted
+        const acceptedProposal = proposals.find(p => p.status === "accepted");
+        if (acceptedProposal) {
+            // Update the gig status if not already assigned
+            // Import the Gig model here (add at the top if not already imported)
+            // import { Gig } from "../models/gig.model.js";
+            const { Gig } = await import("../models/gig.model.js");
+            const gig = await Gig.findById(gig_id);
+            if (gig && gig.status !== "assigned") {
+                gig.status = "assigned";
+                gig.assignedHustler = acceptedProposal.hustler._id || acceptedProposal.hustler; // if populated or not
+                await gig.save();
+            }
+        }
+    }
+    // --- End refresh gig status logic ---
+
     return res.status(200).json(
         new apiResponse(200, proposals, "Proposals fetched successfully")
+    );
+});
+
+// Fetch all gigs assigned to the current hustler
+const getAssignedGigsForHustler = asyncHandler(async (req, res) => {
+    const hustlerId = req.user._id;
+
+    // Find gigs where assigned_hustler is the current hustler
+    const assignedGigs = await gigs.find({ assigned_hustler: hustlerId })
+        .populate({
+            path: "client_id",
+            select: "name email company" // adjust fields as per your client model
+        })
+        .populate({
+            path: "milestones"
+        })
+        .sort({ deadline: 1 });
+
+    return res.status(200).json(
+        new apiResponse(
+            200,
+            assignedGigs,
+            "Assigned gigs fetched successfully"
+        )
     );
 });
 
@@ -353,6 +409,7 @@ export {
     acceptProposal,
     applyToJob,
     changePassword,
+    getAssignedGigsForHustler,
     getProposalsForGig,
     getUser,
     logoutHustler,

@@ -1,5 +1,6 @@
 import { client } from "../models/client.model.js";
 import { gigs } from "../models/gigs.model.js";
+import { Hustler } from "../models/hustler.model.js";
 import { Proposal } from "../models/proposal.model.js";
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
@@ -538,6 +539,12 @@ const acceptProposal = asyncHandler(async (req, res) => {
     gig.assigned_hustler = proposal.hustler;
     gig.status = "closed";
     await gig.save();
+
+    // Add this gig to the hustler's current_gig array if not already present
+    await Hustler.findByIdAndUpdate(
+        proposal.hustler,
+        { $addToSet: { current_gig: proposal.gig } }
+    );
 
     return res.status(200).json(
         new apiResponse(200, proposal, "Proposal accepted and gig updated")
