@@ -210,6 +210,21 @@ const hustlerSchema = new mongoose.Schema({
     },
     // Individual gig ratings
     gig_ratings: [gigRatingSchema],
+    
+    // Organization membership
+    current_organization: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'organization',
+        default: null
+    },
+    organization_position: {
+        type: String,
+        default: ''
+    },
+    organization_join_date: {
+        type: Date,
+        default: null
+    },
 
 }, {timestamps: true}) ;
 
